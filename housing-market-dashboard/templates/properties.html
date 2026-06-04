@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Property Listings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark">H</div><div><h2>Hanoi Housing Market Intelligence System</h2><p>Property intelligence suite</p></div></div>
+        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link active" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/reports">Reports <small>Exports</small></a><a class="nav-link" href="/settings">Settings <small>Config</small></a></nav>
+      </aside>
+      <main class="main-panel">
+        <header class="topbar"><div><h1>Property Listings</h1><p>Search, filter, sort, and inspect high-value listings from the local database.</p></div><div class="topbar-actions"><span class="chip">156 live listings</span><button class="btn btn-primary">Export CSV</button></div></header>
+        <section class="page-content">
+          <article class="card">
+            <div class="search-row">
+              <input class="search-box" type="search" placeholder="Search by title, district, or address" />
+              <select class="select-box"><option>All sources</option><option>Alonhadat</option><option>Homedy</option><option>Nhadat24h</option></select>
+              <select class="select-box"><option>All districts</option><option>Ba Đình</option><option>Đống Đa</option><option>Cầu Giấy</option></select>
+              <select class="select-box"><option>All property types</option><option>Apartment</option><option>Townhouse</option><option>Villa</option></select>
+              <button class="btn btn-secondary">Apply filters</button>
+            </div>
+          </article>
+          <article class="card">
+            <div class="panel-header"><h3>Listings table</h3><span class="badge badge-info">Sorted by price</span></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Property Title</th><th>Address</th><th>Price</th><th>Area</th><th>Type</th><th>Source</th><th>Listing Date</th><th>Detail</th></tr></thead>
+                <tbody>
+                  {% if properties %}
+                    {% for item in properties %}
+                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.district or 'Unknown' }}</td><td>{{ item.price or '—' }}</td><td>{{ item.area or '—' }} m²</td><td>Apartment</td><td>{{ item.source or 'unknown' }}</td><td>04 Jun 2026</td><td><button class="btn btn-secondary">View</button></td></tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr><td colspan="8">No properties found yet.</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+            <div class="panel-header" style="margin-top:12px;"><span class="small-note">Showing 1-10 of 156 records</span><div class="topbar-actions"><button class="btn btn-secondary">Prev</button><button class="btn btn-primary">Next</button></div></div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

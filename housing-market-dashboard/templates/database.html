@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Database Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar"><div class="brand"><div class="brand-mark">H</div><div><h2>Hanoi Housing Market Intelligence System</h2><p>Database control room</p></div></div><nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link active" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/reports">Reports <small>Exports</small></a><a class="nav-link" href="/settings">Settings <small>Config</small></a></nav></aside>
+      <main class="main-panel">
+        <header class="topbar"><div><h1>Database Management</h1><p>Inspect records, manage imports/exports, and monitor database health.</p></div><div class="topbar-actions"><span class="chip">SQLite database</span><button class="btn btn-primary">Backup database</button></div></header>
+        <section class="page-content">
+          <section class="kpi-grid"><article class="card stat-card"><span class="stat-label">Total records</span><span class="stat-value">156</span></article><article class="card stat-card"><span class="stat-label">Last update</span><span class="stat-value">04 Jun</span></article><article class="card stat-card"><span class="stat-label">Database size</span><span class="stat-value">12.4 MB</span></article><article class="card stat-card"><span class="stat-label">Sources</span><span class="stat-value">3</span></article></section>
+          <article class="card"><div class="panel-header"><h3>Import & export actions</h3><span class="badge badge-info">Ready</span></div><div class="topbar-actions"><button class="btn btn-secondary">Import CSV</button><button class="btn btn-secondary">Import JSON</button><button class="btn btn-success">Export CSV</button><button class="btn btn-primary">Export JSON</button></div></article>
+          <article class="card"><div class="panel-header"><h3>Data Preview</h3><span class="badge badge-warn">Sample rows</span></div><div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Title</th><th>District</th><th>Price</th><th>Area</th><th>Source</th></tr></thead><tbody><tr><td>1</td><td>Luxury apartment</td><td>Ba Đình</td><td>4.8B</td><td>92 m²</td><td>Alonhadat</td></tr><tr><td>2</td><td>Townhouse</td><td>Đống Đa</td><td>3.2B</td><td>120 m²</td><td>Homedy</td></tr></tbody></table></div></article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
