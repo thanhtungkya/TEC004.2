@@ -25,7 +25,7 @@ if (startBtn) {
     setStatus('Collecting…', 'badge-live');
     log(`Starting collection for ${sources.join(', ')} with keyword "${keywordInput.value}".`);
     try {
-      const response = await fetch('/api/collect', {
+      const response = await fetch('/api/run-scraper', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

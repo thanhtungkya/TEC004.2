@@ -93,10 +93,15 @@ class DataCleaner:
                 fill_val = median_val if pd.notna(median_val) else 0.0
                 df[col] = df[col].fillna(fill_val)
 
-        # Text columns
-        for col in ('district', 'title', 'source'):
+        # Text columns.  Pandas/SQLite data can contain real NaN values or the
+        # literal string "nan"; neither should be rendered as user-facing text.
+        for col in ('district', 'address', 'title', 'source', 'url'):
             if col in df.columns:
-                df[col] = df[col].fillna('Unknown')
+                df[col] = df[col].replace({np.nan: None, 'nan': None, 'NaN': None, 'None': None, 'null': None})
+                if col == 'url':
+                    df[col] = df[col].fillna('')
+                else:
+                    df[col] = df[col].fillna('Unknown')
 
         return df
 

@@ -13,34 +13,66 @@
         <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link active" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/reports">Reports <small>Exports</small></a><a class="nav-link" href="/settings">Settings <small>Config</small></a></nav>
       </aside>
       <main class="main-panel">
-        <header class="topbar"><div><h1>Property Listings</h1><p>Search, filter, sort, and inspect high-value listings from the local database.</p></div><div class="topbar-actions"><span class="chip">156 live listings</span><button class="btn btn-primary">Export CSV</button></div></header>
+        <header class="topbar">
+          <div><h1>Property Listings</h1><p>Search, filter, sort, and inspect high-value listings from the local database.</p></div>
+          <div class="topbar-actions">
+            <span class="chip">{{ pagination.total }} live listings</span>
+            <a class="btn btn-primary" href="{{ url_for('export_properties_csv', **query_args) }}">Export CSV</a>
+          </div>
+        </header>
         <section class="page-content">
           <article class="card">
-            <div class="search-row">
-              <input class="search-box" type="search" placeholder="Search by title, district, or address" />
-              <select class="select-box"><option>All sources</option><option>Alonhadat</option><option>Homedy</option><option>Nhadat24h</option></select>
-              <select class="select-box"><option>All districts</option><option>Ba Đình</option><option>Đống Đa</option><option>Cầu Giấy</option></select>
-              <select class="select-box"><option>All property types</option><option>Apartment</option><option>Townhouse</option><option>Villa</option></select>
-              <button class="btn btn-secondary">Apply filters</button>
-            </div>
+            <form class="search-row" method="get" action="{{ url_for('properties') }}">
+              <input class="search-box" name="q" type="search" value="{{ filters.q }}" placeholder="Search by title, district, or address" />
+              <select class="select-box" name="source">
+                <option value="all" {% if filters.source == 'all' %}selected{% endif %}>All sources</option>
+                {% for source in sources %}
+                  <option value="{{ source }}" {% if filters.source == source %}selected{% endif %}>{{ source|capitalize }}</option>
+                {% endfor %}
+              </select>
+              <select class="select-box" name="district">
+                <option value="all" {% if filters.district == 'all' %}selected{% endif %}>All districts</option>
+                {% for district in districts %}
+                  <option value="{{ district }}" {% if filters.district == district %}selected{% endif %}>{{ district }}</option>
+                {% endfor %}
+              </select>
+              <select class="select-box" name="property_type" disabled title="Property type data is not stored yet">
+                <option>All property types</option><option>Apartment</option><option>Townhouse</option><option>Villa</option>
+              </select>
+              <button class="btn btn-secondary" type="submit">Apply filters</button>
+            </form>
           </article>
           <article class="card">
-            <div class="panel-header"><h3>Listings table</h3><span class="badge badge-info">Sorted by price</span></div>
+            <div class="panel-header"><h3>Listings table</h3><span class="badge badge-info">Filtered results</span></div>
             <div class="table-wrap">
               <table class="table">
                 <thead><tr><th>Property Title</th><th>Address</th><th>Price</th><th>Area</th><th>Type</th><th>Source</th><th>Listing Date</th><th>Detail</th></tr></thead>
                 <tbody>
                   {% if properties %}
                     {% for item in properties %}
-                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.district or 'Unknown' }}</td><td>{{ item.price or '—' }}</td><td>{{ item.area or '—' }} m²</td><td>Apartment</td><td>{{ item.source or 'unknown' }}</td><td>04 Jun 2026</td><td><button class="btn btn-secondary">View</button></td></tr>
+                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.address or item.district or 'Unknown' }}</td><td>{{ item.price or '—' }}</td><td>{{ item.area or '—' }} m²</td><td>Apartment</td><td>{{ item.source or 'unknown' }}</td><td>04 Jun 2026</td><td>{% if item.url %}<a class="btn btn-secondary" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View</a>{% else %}<button class="btn btn-secondary" disabled title="No detail link saved for this listing">View</button>{% endif %}</td></tr>
                     {% endfor %}
                   {% else %}
-                    <tr><td colspan="8">No properties found yet.</td></tr>
+                    <tr><td colspan="8">No properties found.</td></tr>
                   {% endif %}
                 </tbody>
               </table>
             </div>
-            <div class="panel-header" style="margin-top:12px;"><span class="small-note">Showing 1-10 of 156 records</span><div class="topbar-actions"><button class="btn btn-secondary">Prev</button><button class="btn btn-primary">Next</button></div></div>
+            <div class="panel-header" style="margin-top:12px;">
+              <span class="small-note">Showing {{ pagination.start }}-{{ pagination.end }} of {{ pagination.total }} records</span>
+              <div class="topbar-actions">
+                {% if pagination.has_prev %}
+                  <a class="btn btn-secondary" href="{{ url_for('properties', page=pagination.prev_page, **query_args) }}">Prev</a>
+                {% else %}
+                  <button class="btn btn-secondary" disabled>Prev</button>
+                {% endif %}
+                {% if pagination.has_next %}
+                  <a class="btn btn-primary" href="{{ url_for('properties', page=pagination.next_page, **query_args) }}">Next</a>
+                {% else %}
+                  <button class="btn btn-primary" disabled>Next</button>
+                {% endif %}
+              </div>
+            </div>
           </article>
         </section>
       </main>
