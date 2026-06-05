@@ -1,6 +1,14 @@
 import re
 
-from src.scraper.selenium_scraper import extract_area, extract_district, extract_price, normalise_price_text, render_listing_cards
+from src.scraper.selenium_scraper import (
+    classify_property_type,
+    extract_area,
+    extract_district,
+    extract_listing_date,
+    extract_price,
+    normalise_price_text,
+    render_listing_cards,
+)
 
 NHADAT24H_URL = 'https://nhadat24h.net/ban-can-ho-chung-cu'
 
@@ -35,6 +43,7 @@ def scrape_nhadat24h():
         if re.search(r'\b\d{4,}\s*(?:tỷ|ty)\b', price_text, flags=re.I):
             price_text = normalise_price_text(title + ' ' + cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
+        listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
 
         records.append({
             'title': title[:120],
@@ -44,6 +53,8 @@ def scrape_nhadat24h():
             'price_text': price_text,
             'area': extract_area(area_text or cleaned),
             'area_text': area_text,
+            'property_type': classify_property_type(title + ' ' + cleaned, url),
+            'listing_date': listing_date,
             'source': 'nhadat24h',
             'url': url,
         })

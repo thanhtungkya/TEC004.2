@@ -36,8 +36,11 @@
                   <option value="{{ district }}" {% if filters.district == district %}selected{% endif %}>{{ district }}</option>
                 {% endfor %}
               </select>
-              <select class="select-box" name="property_type" disabled title="Property type data is not stored yet">
-                <option>All property types</option><option>Apartment</option><option>Townhouse</option><option>Villa</option>
+              <select class="select-box" name="property_type">
+                <option value="all" {% if filters.property_type == 'all' %}selected{% endif %}>All property types</option>
+                {% for property_type in property_types %}
+                  <option value="{{ property_type }}" {% if filters.property_type == property_type %}selected{% endif %}>{{ property_type }}</option>
+                {% endfor %}
               </select>
               <button class="btn btn-secondary" type="submit">Apply filters</button>
             </form>
@@ -50,7 +53,7 @@
                 <tbody>
                   {% if properties %}
                     {% for item in properties %}
-                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.address or item.district or 'Unknown' }}</td><td>{{ item.price_text or item.price or '—' }}</td><td>{{ item.area_text or ((item.area|string) ~ ' m²' if item.area else '—') }}</td><td>Apartment</td><td>{{ item.source or 'unknown' }}</td><td>04 Jun 2026</td><td>{% if item.url %}<a class="btn btn-secondary" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View</a>{% else %}<button class="btn btn-secondary" disabled title="No detail link saved for this listing">View</button>{% endif %}</td></tr>
+                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.address or item.district or 'Unknown' }}</td><td>{{ item.price_text or item.price or '—' }}</td><td>{{ item.area_text or ((item.area|string) ~ ' m²' if item.area else '—') }}</td><td>{{ item.property_type or 'Land' }}</td><td>{{ item.source or 'unknown' }}</td><td>{{ item.listing_date_display or item.listing_date or '—' }}</td><td>{% if item.url %}<a class="btn btn-secondary" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View</a>{% else %}<button class="btn btn-secondary" disabled title="No detail link saved for this listing">View</button>{% endif %}</td></tr>
                     {% endfor %}
                   {% else %}
                     <tr><td colspan="8">No properties found.</td></tr>

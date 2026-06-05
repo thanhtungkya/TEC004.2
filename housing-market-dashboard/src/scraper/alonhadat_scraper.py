@@ -1,6 +1,25 @@
-from src.scraper.selenium_scraper import extract_area, extract_district, extract_price, normalise_price_text, render_listing_cards
+import re
+
+from src.scraper.selenium_scraper import (
+    classify_property_type,
+    extract_area,
+    extract_district,
+    extract_listing_date,
+    extract_price,
+    fetch_page_text,
+    normalise_price_text,
+    render_listing_cards,
+)
 
 ALONHADAT_URL = 'https://alonhadat.com.vn/'
+
+
+def _fetch_detail_listing_date(url: str) -> str:
+    text = fetch_page_text(url)
+    match = re.search(r'Ngày đăng:\s*([^\n\r]+)', text, flags=re.I)
+    if match:
+        return extract_listing_date(match.group(1))
+    return ''
 
 
 def scrape_alonhadat():
@@ -29,6 +48,7 @@ def scrape_alonhadat():
         district = extract_district(address or cleaned)
         price_text = normalise_price_text(item.get('price_text') or cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
+        listing_date = extract_listing_date(item.get('listing_date_text') or cleaned) or _fetch_detail_listing_date(url)
 
         records.append({
             'title': title[:120],
@@ -38,6 +58,8 @@ def scrape_alonhadat():
             'price_text': price_text,
             'area': extract_area(area_text or cleaned),
             'area_text': area_text,
+            'property_type': classify_property_type(title + ' ' + cleaned, url),
+            'listing_date': listing_date,
             'source': 'alonhadat',
             'url': url,
         })

@@ -1,5 +1,6 @@
 import re
 import logging
+from datetime import date, timedelta
 
 from playwright.sync_api import sync_playwright
 
@@ -51,6 +52,33 @@ def render_page(url: str, selector: str):
             pass
 
 
+def fetch_page_text(url: str) -> str:
+    """Fetch rendered page body text for detail-page metadata extraction."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=True)
+        page = _new_page(browser)
+        page.goto(url, wait_until="load", timeout=120_000)
+        page.wait_for_timeout(2000)
+        return page.locator("body").inner_text(timeout=10_000)
+    except Exception as exc:
+        logger.error("fetch_page_text(%s) failed: %s", url, exc)
+        return ""
+    finally:
+        try:
+            if browser:
+                browser.close()
+        except Exception:
+            pass
+        try:
+            if pw:
+                pw.stop()
+        except Exception:
+            pass
+
+
 def render_listing_cards(url: str, selector: str, card_selector: str | None = None):
     """
     Return listing data from anchors matching *selector*.
@@ -79,7 +107,8 @@ def render_listing_cards(url: str, selector: str, card_selector: str | None = No
                     url: el.href || null,
                     price_text: (textNode.querySelector('.price, .a-txt-cl1, .vip-price, [class*=price]')?.innerText || '').replace(/^Giá:\\s*/i, '').trim(),
                     area_text: (textNode.querySelector('.acreage, .a-txt-cl2, .vip-kt, .acr, [class*=acreage]')?.innerText || '').replace(/^DT:\\s*/i, '').trim(),
-                    address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address')?.innerText || '').trim()
+                    address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address')?.innerText || '').trim(),
+                    listing_date_text: (textNode.querySelector('.date, .time, [class*=date], [class*=time]')?.innerText || '').trim()
                 };
             })
             """,
@@ -186,6 +215,62 @@ def extract_district(text: str):
         if match:
             return match.group(0).strip()
     return 'Unknown'
+
+
+def classify_property_type(text: str, url: str = '') -> str:
+    value = f"{text or ''} {url or ''}".lower()
+    apartment_markers = [
+        'căn hộ', 'can-ho', 'chung cư', 'chung-cu', 'apartment', 'ccmn',
+        'tòa tháp', 'toa-thap', 'pn', 'phòng ngủ'
+    ]
+    land_markers = [
+        'đất', 'dat-', 'nha-dat', 'nhà đất', 'bán đất', 'ban-dat',
+        'mặt tiền', 'mat-tien', 'nhà phố', 'nha-pho', 'biệt thự', 'biet-thu',
+        'nhà riêng', 'nha-rieng', 'thổ cư', 'tho-cu', 'lô đất', 'lo-dat'
+    ]
+    if any(marker in value for marker in apartment_markers):
+        return 'Apartment'
+    if any(marker in value for marker in land_markers):
+        return 'Land'
+    # Requirement only allows Apartment/Land. Prefer Land for generic house/land listings.
+    return 'Land'
+
+
+def extract_listing_date(text: str, crawl_date: date | None = None) -> str:
+    value = ' '.join(str(text or '').split()).strip()
+    today = crawl_date or date.today()
+    lowered = value.lower()
+    if not value:
+        return ''
+    if 'hôm nay' in lowered:
+        return today.isoformat()
+    if 'hôm qua' in lowered:
+        return (today - timedelta(days=1)).isoformat()
+    match = re.search(r'(\d+)\s+ngày\s+trước', lowered, flags=re.I)
+    if match:
+        return (today - timedelta(days=int(match.group(1)))).isoformat()
+
+    match = re.search(r'(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})', value)
+    if match:
+        day, month, year = (int(part) for part in match.groups())
+        if year < 100:
+            year += 2000
+        try:
+            return date(year, month, day).isoformat()
+        except ValueError:
+            return value[:40]
+
+    match = re.search(r'(\d{1,2})\s+tháng\s+(\d{1,2})(?:\s*,?\s*(\d{4}))?', lowered, flags=re.I)
+    if match:
+        day = int(match.group(1))
+        month = int(match.group(2))
+        year = int(match.group(3) or today.year)
+        try:
+            return date(year, month, day).isoformat()
+        except ValueError:
+            return ''
+
+    return ''
 
 
 def extract_address(text: str):

@@ -95,7 +95,7 @@ class DataCleaner:
 
         # Text columns.  Pandas/SQLite data can contain real NaN values or the
         # literal string "nan"; neither should be rendered as user-facing text.
-        for col in ('district', 'address', 'title', 'source', 'url'):
+        for col in ('district', 'address', 'title', 'source', 'url', 'price_text', 'area_text', 'property_type', 'listing_date'):
             if col in df.columns:
                 df[col] = df[col].replace({np.nan: None, 'nan': None, 'NaN': None, 'None': None, 'null': None})
                 if col == 'url':

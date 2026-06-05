@@ -21,6 +21,8 @@ for source, items in results.items():
             'price_text': item.get('price_text') or '',
             'area': item.get('area') or 0,
             'area_text': item.get('area_text') or '',
+            'property_type': item.get('property_type') or 'Land',
+            'listing_date': item.get('listing_date') or '',
             'source': source,
             'url': url,
         })
@@ -36,4 +38,4 @@ if rows:
     PropertyRepository().insert_many(rows)
 print(f'refreshed rows={len(rows)}')
 for row in rows[:8]:
-    print(row['source'], '|', row['title'], '|', row['address'], '|', row['price_text'], '|', row['area_text'])
+    print(row['source'], '|', row['title'], '|', row['address'], '|', row['price_text'], '|', row['area_text'], '|', row['property_type'], '|', row['listing_date'])

@@ -1,5 +1,6 @@
 import csv
 import math
+from datetime import datetime
 from io import StringIO
 
 from flask import Flask, Response, jsonify, render_template, request
@@ -52,6 +53,22 @@ def _normalise_external_url(url, source=None):
     return value
 
 
+def _format_listing_date(value):
+    """Display listing dates as DD/MM/YYYY while keeping DB values unchanged."""
+    if not value:
+        return ""
+    text = str(value).strip()
+    if not text or text.lower() in {"none", "nan", "null"}:
+        return ""
+
+    for date_format in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
+        try:
+            return datetime.strptime(text[:10], date_format).strftime("%d/%m/%Y")
+        except ValueError:
+            continue
+    return text
+
+
 def _load_property_rows():
     repo = PropertyRepository()
     records = [dict(row) for row in repo.fetch_all()]
@@ -59,6 +76,7 @@ def _load_property_rows():
     properties = dataframe.to_dict("records")
     for item in properties:
         item["url"] = _normalise_external_url(item.get("url"), item.get("source"))
+        item["listing_date_display"] = _format_listing_date(item.get("listing_date"))
     return properties
 
 
@@ -66,6 +84,7 @@ def _filter_property_rows(rows, args):
     query = (args.get("q") or "").strip().lower()
     source = (args.get("source") or "all").strip().lower()
     district = (args.get("district") or "all").strip().lower()
+    property_type = (args.get("property_type") or "all").strip().lower()
 
     filtered = []
     for item in rows:
@@ -73,6 +92,7 @@ def _filter_property_rows(rows, args):
         address = str(item.get("address") or "")
         item_district = str(item.get("district") or "")
         item_source = str(item.get("source") or "").lower()
+        item_type = str(item.get("property_type") or "").lower()
 
         haystack = " ".join([title, address, item_district, item_source]).lower()
         if query and query not in haystack:
@@ -80,6 +100,8 @@ def _filter_property_rows(rows, args):
         if source != "all" and item_source != source:
             continue
         if district != "all" and district not in item_district.lower() and district not in address.lower():
+            continue
+        if property_type != "all" and item_type != property_type:
             continue
         filtered.append(item)
 
@@ -89,7 +111,8 @@ def _filter_property_rows(rows, args):
 def _property_filter_options(rows):
     sources = sorted({str(item.get("source") or "").lower() for item in rows if item.get("source")})
     districts = sorted({str(item.get("district") or "") for item in rows if item.get("district") and str(item.get("district")).lower() != "unknown"})
-    return sources, districts
+    property_types = sorted({str(item.get("property_type") or "") for item in rows if item.get("property_type")})
+    return sources, districts, property_types
 
 
 @app.get("/properties")
@@ -106,7 +129,7 @@ def properties():
     end = start + per_page
     page_rows = filtered_rows[start:end]
 
-    sources, districts = _property_filter_options(all_rows)
+    sources, districts, property_types = _property_filter_options(all_rows)
     query_args = request.args.to_dict(flat=True)
     query_args.pop("page", None)
 
@@ -115,10 +138,12 @@ def properties():
         properties=page_rows,
         sources=sources,
         districts=districts,
+        property_types=property_types,
         filters={
             "q": request.args.get("q", ""),
             "source": request.args.get("source", "all"),
             "district": request.args.get("district", "all"),
+            "property_type": request.args.get("property_type", "all"),
         },
         pagination={
             "page": page,
@@ -140,7 +165,7 @@ def properties():
 def export_properties_csv():
     rows = _filter_property_rows(_load_property_rows(), request.args)
     output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "price_text", "area", "area_text", "source", "url"])
+    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "price_text", "area", "area_text", "property_type", "listing_date", "source", "url"])
     writer.writeheader()
     for item in rows:
         writer.writerow({
@@ -151,6 +176,8 @@ def export_properties_csv():
             "price_text": item.get("price_text") or item.get("price") or "",
             "area": item.get("area") or "",
             "area_text": item.get("area_text") or item.get("area") or "",
+            "property_type": item.get("property_type") or "",
+            "listing_date": item.get("listing_date_display") or _format_listing_date(item.get("listing_date")),
             "source": item.get("source") or "",
             "url": item.get("url") or "",
         })
@@ -237,6 +264,8 @@ def api_run_scraper():
                 "price_text": item.get("price_text"),
                 "area": area,
                 "area_text": item.get("area_text"),
+                "property_type": item.get("property_type"),
+                "listing_date": item.get("listing_date"),
                 "source": source,
                 "url": url,
             })
