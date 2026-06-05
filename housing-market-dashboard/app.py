@@ -1,4 +1,5 @@
 import csv
+import json
 import math
 from datetime import datetime
 from io import StringIO
@@ -191,13 +192,136 @@ def export_properties_csv():
     )
 
 
+def _filter_analytics_rows(rows, args):
+    district = (args.get("district") or "all").strip().lower()
+    property_type = (args.get("property_type") or "all").strip().lower()
+
+    filtered = []
+    for item in rows:
+        item_district = str(item.get("district") or "").lower()
+        item_address = str(item.get("address") or "").lower()
+        item_type = str(item.get("property_type") or "").lower()
+        if district != "all" and district not in item_district and district not in item_address:
+            continue
+        if property_type != "all" and item_type != property_type:
+            continue
+        filtered.append(item)
+    return filtered
+
+
+def _format_price_millions(value):
+    value = float(value or 0)
+    if value >= 1000:
+        return f"{value / 1000:.2f} tỷ"
+    return f"{value:.0f} triệu"
+
+
+def _build_analytics_context(args):
+    all_rows = _load_property_rows()
+    rows = _filter_analytics_rows(all_rows, args)
+    dataframe = transform_records(rows)
+
+    valid_price_rows = [item for item in rows if float(item.get("price") or 0) > 0]
+    valid_area_rows = [item for item in rows if float(item.get("price") or 0) > 0 and float(item.get("area") or 0) > 0]
+    total_listings = len(rows)
+    avg_price = sum(float(item.get("price") or 0) for item in valid_price_rows) / len(valid_price_rows) if valid_price_rows else 0
+    avg_price_per_m2 = sum(float(item.get("price") or 0) / float(item.get("area") or 1) for item in valid_area_rows) / len(valid_area_rows) if valid_area_rows else 0
+    districts = sorted({str(item.get("district") or "") for item in all_rows if item.get("district") and str(item.get("district")).lower() != "unknown"})
+    property_types = sorted({str(item.get("property_type") or "") for item in all_rows if item.get("property_type")})
+
+    district_groups = {}
+    for item in valid_price_rows:
+        district_name = item.get("district") or "Unknown"
+        district_groups.setdefault(district_name, []).append(float(item.get("price") or 0))
+    district_comparison = [
+        {"district": name, "avg_price": round(sum(values) / len(values), 2), "count": len(values)}
+        for name, values in district_groups.items()
+    ]
+    district_comparison.sort(key=lambda item: item["avg_price"], reverse=True)
+    district_comparison = district_comparison[:10]
+
+    type_counts = {}
+    for item in rows:
+        type_name = item.get("property_type") or "Unknown"
+        type_counts[type_name] = type_counts.get(type_name, 0) + 1
+    property_type_distribution = [{"property_type": name, "count": count} for name, count in sorted(type_counts.items())]
+
+    most_expensive = sorted(valid_price_rows, key=lambda item: float(item.get("price") or 0), reverse=True)[:10]
+    most_expensive = [{
+        "title": item.get("title") or "Untitled listing",
+        "district": item.get("district") or "Unknown",
+        "price": item.get("price_text") or _format_price_millions(item.get("price")),
+    } for item in most_expensive]
+
+    best_value = sorted(valid_area_rows, key=lambda item: float(item.get("price") or 0) / float(item.get("area") or 1))[:10]
+    best_value = [{
+        "title": item.get("title") or "Untitled listing",
+        "district": item.get("district") or "Unknown",
+        "price_per_m2": _format_price_millions(float(item.get("price") or 0) / float(item.get("area") or 1)),
+    } for item in best_value]
+
+    latest_dates = [item.get("listing_date") for item in rows if item.get("listing_date") and str(item.get("listing_date")).lower() != "unknown"]
+    latest_date = max(latest_dates) if latest_dates else ""
+
+    return {
+        "summary": {
+            "total_listings": total_listings,
+            "avg_price": round(avg_price, 2),
+            "avg_price_per_m2": round(avg_price_per_m2, 2),
+            "district_coverage": len({item.get("district") for item in rows if item.get("district") and str(item.get("district")).lower() != "unknown"}),
+        },
+        "districts": districts,
+        "property_types": property_types,
+        "filters": {
+            "district": args.get("district", "all"),
+            "property_type": args.get("property_type", "all"),
+            "period": args.get("period", "all"),
+        },
+        "updated_label": _format_listing_date(latest_date) if latest_date else "—",
+        "district_comparison": district_comparison,
+        "property_type_distribution": property_type_distribution,
+        "most_expensive": most_expensive,
+        "best_value": best_value,
+        "chart_data": {
+            "district_labels": [item["district"] for item in district_comparison],
+            "district_prices": [item["avg_price"] for item in district_comparison],
+            "type_labels": [item["property_type"] for item in property_type_distribution],
+            "type_counts": [item["count"] for item in property_type_distribution],
+        },
+    }
+
+
 @app.get("/analytics")
 def analytics():
-    repo = PropertyRepository()
-    records = [dict(row) for row in repo.fetch_all()]
-    dataframe = transform_records(records)
-    summary = MarketAnalysis().summarize(dataframe)
-    return render_template("analytics.html", summary=summary)
+    context = _build_analytics_context(request.args)
+    context["chart_data_json"] = json.dumps(context["chart_data"], ensure_ascii=False)
+    return render_template("analytics.html", **context)
+
+
+@app.get("/analytics/export.csv")
+def export_analytics_csv():
+    context = _build_analytics_context(request.args)
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["metric", "value"])
+    for key, value in context["summary"].items():
+        writer.writerow([key, value])
+    writer.writerow([])
+    writer.writerow(["top_10_most_expensive"])
+    writer.writerow(["listing", "district", "price"])
+    for item in context["most_expensive"]:
+        writer.writerow([item["title"], item["district"], item["price"]])
+    writer.writerow([])
+    writer.writerow(["top_10_best_value"])
+    writer.writerow(["listing", "district", "price_per_m2"])
+    for item in context["best_value"]:
+        writer.writerow([item["title"], item["district"], item["price_per_m2"]])
+    csv_bytes = output.getvalue().encode("utf-8-sig")
+    return Response(
+        csv_bytes,
+        content_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": "attachment; filename=analytics_insights.csv"},
+    )
 
 
 @app.get("/data-collection")
