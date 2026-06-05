@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, render_template, request
 
+from src.analytics.district_analysis import DistrictAnalysis
 from src.analytics.market_analysis import MarketAnalysis
 from src.database.create_tables import create_tables
 from src.database.property_repository import PropertyRepository
-from src.processing.transform_data import transform_records
+from src.processing.transform_data import DataCleaner, transform_records
 from src.scraper.scraper_manager import run_all_scrapers
 
 app = Flask(__name__)
@@ -119,6 +120,30 @@ def api_summary():
     records = [dict(row) for row in repo.fetch_all()]
     dataframe = transform_records(records)
     return jsonify(MarketAnalysis().summarize(dataframe))
+
+
+@app.get("/api/analysis")
+def api_analysis():
+    """Full statistical analysis report (cleaning → analysis pipeline)."""
+    repo = PropertyRepository()
+    records = [dict(row) for row in repo.fetch_all()]
+    dataframe = DataCleaner().clean(records)
+    report = MarketAnalysis().full_report(dataframe)
+    return jsonify(report)
+
+
+@app.get("/api/district-stats")
+def api_district_stats():
+    """Per-district price and area statistics."""
+    repo = PropertyRepository()
+    records = [dict(row) for row in repo.fetch_all()]
+    dataframe = DataCleaner().clean(records)
+    analysis = DistrictAnalysis()
+    return jsonify({
+        'top_districts': analysis.top_districts(dataframe),
+        'price_statistics': analysis.price_statistics(dataframe),
+        'area_statistics': analysis.area_statistics(dataframe),
+    })
 
 
 if __name__ == "__main__":
