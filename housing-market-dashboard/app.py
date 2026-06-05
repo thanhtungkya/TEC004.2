@@ -140,7 +140,7 @@ def properties():
 def export_properties_csv():
     rows = _filter_property_rows(_load_property_rows(), request.args)
     output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "area", "source", "url"])
+    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "price_text", "area", "area_text", "source", "url"])
     writer.writeheader()
     for item in rows:
         writer.writerow({
@@ -148,13 +148,18 @@ def export_properties_csv():
             "address": item.get("address") or item.get("district") or "",
             "district": item.get("district") or "",
             "price": item.get("price") or "",
+            "price_text": item.get("price_text") or item.get("price") or "",
             "area": item.get("area") or "",
+            "area_text": item.get("area_text") or item.get("area") or "",
             "source": item.get("source") or "",
             "url": item.get("url") or "",
         })
+    # Excel on Windows often guesses CSV files as ANSI unless a UTF-8 BOM is
+    # present, which turns Vietnamese text into mojibake like "PhÆ°á»ng".
+    csv_bytes = output.getvalue().encode("utf-8-sig")
     return Response(
-        output.getvalue(),
-        mimetype="text/csv",
+        csv_bytes,
+        content_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": "attachment; filename=property_listings.csv"},
     )
 
@@ -229,7 +234,9 @@ def api_run_scraper():
                 "district": item_district,
                 "address": address,
                 "price": price,
+                "price_text": item.get("price_text"),
                 "area": area,
+                "area_text": item.get("area_text"),
                 "source": source,
                 "url": url,
             })

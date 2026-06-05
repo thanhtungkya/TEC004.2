@@ -1,17 +1,13 @@
-from src.scraper.selenium_scraper import extract_address, extract_area, extract_district, extract_price, render_listing_cards
+from src.scraper.selenium_scraper import extract_area, extract_district, extract_price, normalise_price_text, render_listing_cards
 
 HOMEDY_URL = 'https://homedy.com/ban-nha-rieng'
 
 
 def scrape_homedy():
     records = []
-
-    # Homedy detail anchors use an -es<ID> suffix and class image-thumb on the
-    # cards observed from the site.  Pull the anchor href directly instead of
-    # reconstructing a URL from title text.
     cards = render_listing_cards(
         HOMEDY_URL,
-        'a.image-thumb[href*="-es"], a[href*="-es"]:has-text("tỷ"), a[href*="-es"]:has-text("Tỷ"), a[href*="-es"]:has-text("triệu"), a[href*="-es"]:has-text("Triệu")',
+        '.product-item a.title[href*="-es"]',
         '.product-item',
     )
 
@@ -23,21 +19,23 @@ def scrape_homedy():
         seen_urls.add(url)
 
         cleaned = ' '.join((item.get('text') or '').split())
-        title = ' '.join((item.get('title') or cleaned).split())
+        title = ' '.join((item.get('title') or '').split())
         if not title or len(cleaned) < 20:
             continue
 
-        address = extract_address(cleaned)
-        district = extract_district(cleaned)
-        if district == 'Unknown':
-            district = extract_district(address)
+        address = ' '.join((item.get('address') or '').split())
+        district = extract_district(address or cleaned)
+        price_text = normalise_price_text(item.get('price_text') or cleaned)
+        area_text = ' '.join((item.get('area_text') or '').split())
 
         records.append({
             'title': title[:120],
             'district': district,
-            'address': address,
-            'price': extract_price(cleaned),
-            'area': extract_area(cleaned),
+            'address': address or district,
+            'price': extract_price(price_text),
+            'price_text': price_text,
+            'area': extract_area(area_text or cleaned),
+            'area_text': area_text,
             'source': 'homedy',
             'url': url,
         })

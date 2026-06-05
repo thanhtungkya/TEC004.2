@@ -11,7 +11,9 @@ class PropertyRepository:
                     row.get('district'),
                     row.get('address'),
                     row.get('price'),
+                    row.get('price_text'),
                     row.get('area'),
+                    row.get('area_text'),
                     row.get('source'),
                     row.get('url'),
                 ))
@@ -20,18 +22,21 @@ class PropertyRepository:
             values = tuple(row)
             if len(values) == 5:
                 title, district, price, area, source = values
-                values = (title, district, district, price, area, source, None)
+                values = (title, district, district, price, None, area, None, source, None)
             elif len(values) == 6:
                 title, district, price, area, source, url = values
-                values = (title, district, district, price, area, source, url)
+                values = (title, district, district, price, None, area, None, source, url)
+            elif len(values) == 7:
+                title, district, address, price, area, source, url = values
+                values = (title, district, address, price, None, area, None, source, url)
             normalised_rows.append(values)
 
         conn = get_connection()
         try:
             conn.executemany(
                 """
-                INSERT INTO properties (title, district, address, price, area, source, url)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO properties (title, district, address, price, price_text, area, area_text, source, url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 normalised_rows,
             )

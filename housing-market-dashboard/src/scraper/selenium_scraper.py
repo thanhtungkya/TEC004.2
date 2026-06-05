@@ -76,7 +76,10 @@ def render_listing_cards(url: str, selector: str, card_selector: str | None = No
                 return {
                     text: (textNode.innerText || textNode.textContent || '').trim(),
                     title: (el.innerText || el.textContent || '').trim(),
-                    url: el.href || null
+                    url: el.href || null,
+                    price_text: (textNode.querySelector('.price, .a-txt-cl1, .vip-price, [class*=price]')?.innerText || '').replace(/^Giá:\\s*/i, '').trim(),
+                    area_text: (textNode.querySelector('.acreage, .a-txt-cl2, .vip-kt, .acr, [class*=acreage]')?.innerText || '').replace(/^DT:\\s*/i, '').trim(),
+                    address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address')?.innerText || '').trim()
                 };
             })
             """,
@@ -98,16 +101,71 @@ def render_listing_cards(url: str, selector: str, card_selector: str | None = No
             pass
 
 
-def extract_price(text: str):
-    match = re.search(r'(\d+(?:\s\d+)*(?:[.,]\d+)?)\s*(tỷ|triệu|tr)', text, flags=re.I)
+def _parse_vietnamese_amount(amount_text: str, unit: str) -> float:
+    clean = str(amount_text or '').strip()
+    compact = clean.replace(' ', '')
+    unit = (unit or '').lower()
+    if unit in ('tỷ', 'ty'):
+        # Listing sites often write 1 920 tỷ / 1.920 tỷ / 1,920 tỷ to mean
+        # 1 tỷ 920 triệu, not one-thousand-nine-hundred-twenty tỷ.
+        if re.match(r'^\d+[\s.,]\d{3}$', clean):
+            compact = re.sub(r'[\s,]', '.', clean)
+        else:
+            compact = compact.replace(',', '.')
+    else:
+        compact = compact.replace('.', '').replace(',', '.')
+    return float(compact)
+
+
+def normalise_price_text(text: str):
+    raw = ' '.join(str(text or '').split()).strip()
+    if not raw:
+        return ''
+    lowered = raw.lower()
+    if 'thỏa' in lowered or 'thoả' in lowered:
+        return 'Thỏa thuận'
+
+    match = re.search(r'(\d+(?:[\s.,]\d+)*)\s*(tỷ|ty|triệu|tr)\b', raw, flags=re.I)
     if not match:
-        return 0.0
-    amount_text = match.group(1).replace(' ', '')
-    amount = float(amount_text.replace('.', '').replace(',', '.'))
+        return raw
+
+    amount = match.group(1).strip()
     unit = match.group(2).lower()
-    if unit in ('tỷ', 'ty', 'tr'):
-        amount *= 1000
-    return round(amount, 2)
+    if unit in ('triệu', 'tr'):
+        return f"{amount.replace('.', ',')} triệu"
+
+    # Keep the unit text, but avoid UI like "8.25 tỷ".  Vietnamese listing
+    # users expect "8 tỷ 250 triệu" for decimal-billion prices.
+    try:
+        value = _parse_vietnamese_amount(amount, unit)
+    except ValueError:
+        return f"{amount} tỷ"
+    whole = int(value)
+    million = round((value - whole) * 1000)
+    if million <= 0:
+        return f"{whole} tỷ"
+    if million >= 1000:
+        return f"{whole + 1} tỷ"
+    return f"{whole} tỷ {million} triệu"
+
+
+def extract_price(text: str):
+    clean_text = str(text or '')
+    if 'thỏa' in clean_text.lower() or 'thoả' in clean_text.lower():
+        return 0.0
+
+    total = 0.0
+    found = False
+    for match in re.finditer(r'(\d+(?:\s\d+)*(?:[.,]\d+)?)\s*(tỷ|ty|triệu|tr)\b', clean_text, flags=re.I):
+        found = True
+        amount_text = match.group(1)
+        unit = match.group(2).lower()
+        amount = _parse_vietnamese_amount(amount_text, unit)
+        if unit in ('tỷ', 'ty'):
+            total += amount * 1000
+        else:
+            total += amount
+    return round(total, 2) if found else 0.0
 
 
 def extract_area(text: str):

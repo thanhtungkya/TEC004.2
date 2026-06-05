@@ -12,7 +12,9 @@ def create_tables() -> None:
                 district TEXT,
                 address TEXT,
                 price REAL,
+                price_text TEXT,
                 area REAL,
+                area_text TEXT,
                 source TEXT,
                 url TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -26,6 +28,10 @@ def create_tables() -> None:
             conn.execute("ALTER TABLE properties ADD COLUMN address TEXT")
         if "url" not in columns:
             conn.execute("ALTER TABLE properties ADD COLUMN url TEXT")
+        if "price_text" not in columns:
+            conn.execute("ALTER TABLE properties ADD COLUMN price_text TEXT")
+        if "area_text" not in columns:
+            conn.execute("ALTER TABLE properties ADD COLUMN area_text TEXT")
 
         conn.commit()
     finally:
