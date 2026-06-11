@@ -4,6 +4,7 @@ from src.database.property_repository import PropertyRepository
 from src.scraper.scraper_manager import run_all_scrapers
 
 create_tables()
+
 results = run_all_scrapers(['alonhadat', 'homedy', 'nhadat24h'])
 rows=[]
 seen=set()

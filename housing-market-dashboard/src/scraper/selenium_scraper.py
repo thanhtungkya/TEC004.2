@@ -1,6 +1,7 @@
 import re
 import logging
 from datetime import date, timedelta
+from typing import Optional
 
 from playwright.sync_api import sync_playwright
 
@@ -79,7 +80,7 @@ def fetch_page_text(url: str) -> str:
             pass
 
 
-def render_listing_cards(url: str, selector: str, card_selector: str | None = None):
+def render_listing_cards(url: str, selector: str, card_selector: Optional[str] = None):
     """
     Return listing data from anchors matching *selector*.
 
@@ -236,7 +237,7 @@ def classify_property_type(text: str, url: str = '') -> str:
     return 'Land'
 
 
-def extract_listing_date(text: str, crawl_date: date | None = None) -> str:
+def extract_listing_date(text: str, crawl_date: Optional[date] = None) -> str:
     value = ' '.join(str(text or '').split()).strip()
     today = crawl_date or date.today()
     lowered = value.lower()
