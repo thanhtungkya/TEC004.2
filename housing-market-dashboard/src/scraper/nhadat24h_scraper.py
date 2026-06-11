@@ -1,22 +1,62 @@
-from src.scraper.selenium_scraper import extract_area, extract_district, extract_price, render_page
+import re
+
+from src.scraper.selenium_scraper import (
+    classify_property_type,
+    extract_area,
+    extract_district,
+    extract_listing_date,
+    extract_price,
+    normalise_price_text,
+    render_listing_cards,
+)
+
+NHADAT24H_URL = 'https://nhadat24h.net/ban-can-ho-chung-cu'
 
 
 def scrape_nhadat24h():
-    text_blocks = render_page('https://nhadat24h.net/ban-can-ho-chung-cu', "a:has-text('Tỷ')")
     records = []
-    for block in text_blocks:
-        cleaned = ' '.join(block.split())
-        if not cleaned or len(cleaned) < 15:
+    cards = render_listing_cards(
+        NHADAT24H_URL,
+        '.dv-item .dv-txt a[href*="-ID"]',
+        '.dv-item',
+    )
+
+    seen_urls = set()
+    for item in cards:
+        url = item.get('url')
+        if not url or url in seen_urls:
             continue
-        title = cleaned[:120]
-        price = extract_price(cleaned)
-        area = extract_area(cleaned)
-        district = extract_district(cleaned)
+        seen_urls.add(url)
+
+        cleaned = ' '.join((item.get('text') or '').split())
+        title = ' '.join((item.get('title') or '').split())
+        if not title or len(cleaned) < 15:
+            continue
+
+        address = ' '.join((item.get('address') or '').split())
+        district = extract_district(address or cleaned)
+        raw_price = item.get('price_text') or cleaned
+        price_text = normalise_price_text(raw_price)
+        # Nhadat24h sometimes drops the separator in the compact price element
+        # (e.g. "1920 Tỷ" while the title/card says "1,920TỶ"). If that
+        # happens, prefer the title/card text so we display "1 tỷ 920 triệu".
+        if re.search(r'\b\d{4,}\s*(?:tỷ|ty)\b', price_text, flags=re.I):
+            price_text = normalise_price_text(title + ' ' + cleaned)
+        area_text = ' '.join((item.get('area_text') or '').split())
+        listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
+
         records.append({
-            'title': title,
+            'title': title[:120],
             'district': district,
-            'price': price,
-            'area': area,
+            'address': address or district,
+            'price': extract_price(price_text),
+            'price_text': price_text,
+            'area': extract_area(area_text or cleaned),
+            'area_text': area_text,
+            'property_type': classify_property_type(title + ' ' + cleaned, url),
+            'listing_date': listing_date,
             'source': 'nhadat24h',
+            'url': url,
         })
+
     return records[:10]
