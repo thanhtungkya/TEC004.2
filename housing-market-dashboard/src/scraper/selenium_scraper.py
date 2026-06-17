@@ -39,10 +39,14 @@ def render_page(url: str, selector: str):
     browser = None
     try:
         pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
+        browser = pw.chromium.launch(
+            headless=True,
+            args=["--disable-dev-shm-usage", "--no-sandbox"],
+        )
         page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(2000)                       # let JS render
+        logger.info("render_page: fetching %s", url)
+        page.goto(url, wait_until="load", timeout=180_000)
+        page.wait_for_timeout(5000)                       # let JS render
         texts = page.locator(selector).all_inner_texts()
         return texts
     except Exception as exc:
@@ -67,10 +71,14 @@ def fetch_page_text(url: str) -> str:
     browser = None
     try:
         pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
+        browser = pw.chromium.launch(
+            headless=True,
+            args=["--disable-dev-shm-usage", "--no-sandbox"],
+        )
         page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(2000)
+        logger.info("fetch_page_text: fetching %s", url)
+        page.goto(url, wait_until="load", timeout=180_000)
+        page.wait_for_timeout(5000)
         return page.locator("body").inner_text(timeout=10_000)
     except Exception as exc:
         logger.error("fetch_page_text(%s) failed: %s", url, exc)
@@ -101,10 +109,14 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
     browser = None
     try:
         pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
+        browser = pw.chromium.launch(
+            headless=True,
+            args=["--disable-dev-shm-usage", "--no-sandbox"],
+        )
         page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(3000)
+        logger.info("render_listing_cards: fetching %s", url)
+        page.goto(url, wait_until="load", timeout=180_000)
+        page.wait_for_timeout(5000)
         return page.locator(selector).evaluate_all(
             """
             (els, cardSelector) => els.map(el => {
