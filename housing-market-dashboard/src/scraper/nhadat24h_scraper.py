@@ -8,12 +8,13 @@ from src.scraper.selenium_scraper import (
     extract_price,
     normalise_price_text,
     render_listing_cards,
+    HANOI_DISTRICTS,
 )
 
 NHADAT24H_URL = 'https://nhadat24h.net/ban-can-ho-chung-cu'
 
 
-def scrape_nhadat24h():
+def scrape_nhadat24h(progress_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         NHADAT24H_URL,
@@ -23,6 +24,8 @@ def scrape_nhadat24h():
 
     seen_urls = set()
     for item in cards:
+        if abort_event and abort_event.is_set():
+            break
         url = item.get('url')
         if not url or url in seen_urls:
             continue
@@ -35,6 +38,8 @@ def scrape_nhadat24h():
 
         address = ' '.join((item.get('address') or '').split())
         district = extract_district(address or cleaned)
+        if district not in HANOI_DISTRICTS:
+            continue
         raw_price = item.get('price_text') or cleaned
         price_text = normalise_price_text(raw_price)
         # Nhadat24h sometimes drops the separator in the compact price element
@@ -58,5 +63,7 @@ def scrape_nhadat24h():
             'source': 'nhadat24h',
             'url': url,
         })
+        if progress_cb:
+            progress_cb('nhadat24h')
 
-    return records[:10]
+    return records[:200]

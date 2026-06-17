@@ -6,12 +6,13 @@ from src.scraper.selenium_scraper import (
     extract_price,
     normalise_price_text,
     render_listing_cards,
+    HANOI_DISTRICTS,
 )
 
 HOMEDY_URL = 'https://homedy.com/ban-nha-rieng'
 
 
-def scrape_homedy():
+def scrape_homedy(progress_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         HOMEDY_URL,
@@ -21,6 +22,8 @@ def scrape_homedy():
 
     seen_urls = set()
     for item in cards:
+        if abort_event and abort_event.is_set():
+            break
         url = item.get('url')
         if not url or url in seen_urls:
             continue
@@ -33,6 +36,8 @@ def scrape_homedy():
 
         address = ' '.join((item.get('address') or '').split())
         district = extract_district(address or cleaned)
+        if district not in HANOI_DISTRICTS:
+            continue
         price_text = normalise_price_text(item.get('price_text') or cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
@@ -50,5 +55,7 @@ def scrape_homedy():
             'source': 'homedy',
             'url': url,
         })
+        if progress_cb:
+            progress_cb('homedy')
 
-    return records[:10]
+    return records[:200]

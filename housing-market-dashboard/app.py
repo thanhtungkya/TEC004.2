@@ -3,6 +3,7 @@ import json
 import math
 from datetime import datetime
 from io import StringIO
+import threading
 import app
 
 from flask import Flask, Response, jsonify, render_template, request
@@ -13,11 +14,21 @@ from src.database.create_tables import create_tables
 from src.database.property_repository import PropertyRepository
 from src.processing.transform_data import DataCleaner, transform_records
 from src.scraper.scraper_manager import run_all_scrapers
+from src.services.openai_service import predict_prices
+from src.database.db_connection import get_connection
 
 app = Flask(__name__)
 
 # Initialise the database once at import-time (not on every request).
 create_tables()
+
+scraping_state = {
+    "is_running": False,
+    "abort_event": None,
+    "progress": {},
+    "records_saved": 0,
+    "message": ""
+}
 
 
 @app.after_request
@@ -37,7 +48,9 @@ def index():
 
 @app.get("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    repo = PropertyRepository()
+    rows = [dict(row) for row in repo.fetch_all()][:10]
+    return render_template("dashboard.html", properties=rows)
 
 
 def _normalise_external_url(url, source=None):
@@ -347,6 +360,10 @@ def settings():
 
 @app.post("/api/run-scraper")
 def api_run_scraper():
+    global scraping_state
+    if scraping_state.get("is_running"):
+        return jsonify({"status": "error", "message": "Scraping is already in progress."}), 400
+
     create_tables()
 
     selected = request.get_json(silent=True) or {}
@@ -359,56 +376,123 @@ def api_run_scraper():
     if not sources:
         return jsonify({"status": "error", "message": "No valid sources were selected."}), 400
 
-    try:
-        results = run_all_scrapers(sources)
-    except Exception as exc:
-        return jsonify({"status": "error", "message": f"Scraping failed: {exc}"}), 500
-
-    seen = set()
-    collected = []
-
-    for source, rows in results.items():
-        for item in rows or []:
-            title = str(item.get("title") or "Untitled listing").strip()[:120]
-            item_district = str(item.get("district") or district or "Unknown").strip()
-            address = str(item.get("address") or item_district or "Unknown").strip()
-            price = item.get("price") or 0
-            area = item.get("area") or 0
-            url = str(item.get("url") or "").strip() or None
-            record_key = (source, title, item_district, address, price, area, url)
-
-            if record_key in seen:
-                continue
-            seen.add(record_key)
-
-            collected.append({
-                "title": title,
-                "district": item_district,
-                "address": address,
-                "price": price,
-                "price_text": item.get("price_text"),
-                "area": area,
-                "area_text": item.get("area_text"),
-                "property_type": item.get("property_type"),
-                "listing_date": item.get("listing_date"),
-                "source": source,
-                "url": url,
-            })
-
-    if collected:
-        try:
-            PropertyRepository().insert_many(collected)
-        except Exception as exc:
-            return jsonify({"status": "error", "message": f"Database update failed: {exc}"}), 500
-
-    return jsonify({
-        "status": "ok",
+    scraping_state = {
+        "is_running": True,
+        "abort_event": threading.Event(),
+        "progress": {s: 0 for s in sources},
+        "records_saved": 0,
+        "message": "Starting...",
         "keyword": keyword,
         "district": district,
-        "sources": sources,
-        "records_saved": len(collected),
-        "message": f"Collected {len(collected)} listings from {', '.join(sources)}.",
+        "sources": sources
+    }
+
+    def _scrape_worker():
+        global scraping_state
+        def _progress_cb(source_name):
+            scraping_state["progress"][source_name] += 1
+            
+        try:
+            results = run_all_scrapers(sources, progress_cb=_progress_cb, abort_event=scraping_state["abort_event"])
+        except Exception as exc:
+            scraping_state["is_running"] = False
+            scraping_state["message"] = f"Scraping failed: {exc}"
+            return
+
+        seen = set()
+        collected = []
+
+        for source, rows in results.items():
+            for item in rows or []:
+                title = str(item.get("title") or "Untitled listing").strip()[:120]
+                item_district = str(item.get("district") or district or "Unknown").strip()
+                address = str(item.get("address") or item_district or "Unknown").strip()
+                price = item.get("price") or 0
+                area = item.get("area") or 0
+                url = str(item.get("url") or "").strip() or None
+                record_key = (source, title, item_district, address, price, area, url)
+
+                if record_key in seen:
+                    continue
+                seen.add(record_key)
+
+                collected.append({
+                    "title": title,
+                    "district": item_district,
+                    "address": address,
+                    "price": price,
+                    "price_text": item.get("price_text"),
+                    "area": area,
+                    "area_text": item.get("area_text"),
+                    "property_type": item.get("property_type"),
+                    "listing_date": item.get("listing_date"),
+                    "source": source,
+                    "url": url,
+                })
+
+        if collected:
+            try:
+                PropertyRepository().insert_many(collected)
+                scraping_state["records_saved"] = len(collected)
+                scraping_state["message"] = f"Collected {len(collected)} listings from {', '.join(sources)}."
+            except Exception as exc:
+                scraping_state["message"] = f"Database update failed: {exc}"
+        else:
+            scraping_state["message"] = f"Collected 0 listings from {', '.join(sources)}."
+            
+        scraping_state["is_running"] = False
+
+    thread = threading.Thread(target=_scrape_worker)
+    thread.daemon = True
+    thread.start()
+
+    return jsonify({"status": "ok", "message": "Scraping started."})
+
+
+@app.get("/api/scraper-status")
+def api_scraper_status():
+    global scraping_state
+    return jsonify({
+        "is_running": scraping_state.get("is_running", False),
+        "progress": scraping_state.get("progress", {}),
+        "records_saved": scraping_state.get("records_saved", 0),
+        "message": scraping_state.get("message", "")
     })
+
+
+@app.post("/api/stop-scraper")
+def api_stop_scraper():
+    global scraping_state
+    if scraping_state.get("is_running") and scraping_state.get("abort_event"):
+        scraping_state["abort_event"].set()
+        return jsonify({"status": "ok", "message": "Stop signal sent."})
+    return jsonify({"status": "error", "message": "Not running."}), 400
+
+
+@app.post("/api/analyze-prices")
+def api_analyze_prices():
+    repo = PropertyRepository()
+    all_rows = [dict(row) for row in repo.fetch_all()]
+    rows_to_analyze = [row for row in all_rows if row.get('price') and row.get('area') and not row.get('ai_predicted_price')]
+    rows_to_analyze = rows_to_analyze[:10]
+    
+    if not rows_to_analyze:
+        return jsonify({"status": "ok", "message": "No new properties to analyze."})
+
+    predictions = predict_prices(rows_to_analyze)
+    
+    if not predictions:
+        return jsonify({"status": "error", "message": "Failed to get predictions."})
+
+    conn = get_connection()
+    try:
+        for pid, price in predictions.items():
+            conn.execute("UPDATE properties SET ai_predicted_price = ? WHERE id = ?", (price, pid))
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({"status": "ok", "message": f"Analyzed {len(predictions)} properties."})
 
 
 @app.get("/api/summary")

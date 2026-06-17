@@ -38,6 +38,8 @@ def create_tables() -> None:
             conn.execute("ALTER TABLE properties ADD COLUMN property_type TEXT")
         if "listing_date" not in columns:
             conn.execute("ALTER TABLE properties ADD COLUMN listing_date TEXT")
+        if "ai_predicted_price" not in columns:
+            conn.execute("ALTER TABLE properties ADD COLUMN ai_predicted_price REAL")
 
         conn.commit()
     finally:

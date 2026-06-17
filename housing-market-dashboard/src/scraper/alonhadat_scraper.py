@@ -9,6 +9,7 @@ from src.scraper.selenium_scraper import (
     fetch_page_text,
     normalise_price_text,
     render_listing_cards,
+    HANOI_DISTRICTS,
 )
 
 ALONHADAT_URL = 'https://alonhadat.com.vn/'
@@ -22,7 +23,7 @@ def _fetch_detail_listing_date(url: str) -> str:
     return ''
 
 
-def scrape_alonhadat():
+def scrape_alonhadat(progress_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         ALONHADAT_URL,
@@ -32,6 +33,8 @@ def scrape_alonhadat():
 
     seen_urls = set()
     for item in cards:
+        if abort_event and abort_event.is_set():
+            break
         url = item.get('url')
         if not url or url in seen_urls:
             continue
@@ -46,6 +49,8 @@ def scrape_alonhadat():
         # Use that explicit location instead of falling back to title text.
         address = ' '.join((item.get('address') or '').split())
         district = extract_district(address or cleaned)
+        if district not in HANOI_DISTRICTS:
+            continue
         price_text = normalise_price_text(item.get('price_text') or cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned) or _fetch_detail_listing_date(url)
@@ -63,5 +68,7 @@ def scrape_alonhadat():
             'source': 'alonhadat',
             'url': url,
         })
+        if progress_cb:
+            progress_cb('alonhadat')
 
-    return records[:10]
+    return records[:200]

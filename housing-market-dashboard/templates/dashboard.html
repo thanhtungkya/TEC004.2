@@ -36,7 +36,7 @@
           </div>
           <div class="topbar-actions">
             <span class="chip">Updated 4 Jun 2026</span>
-            <button class="btn btn-primary">Generate report</button>
+            <button class="btn btn-primary" id="analyzeBtn">Analyze Prices (AI)</button>
           </div>
         </header>
         <section class="page-content">
@@ -86,11 +86,26 @@
             <div class="panel-header"><h3>Recent Properties</h3><a class="small-note" href="/properties">View all listings →</a></div>
             <div class="table-wrap">
               <table class="table">
-                <thead><tr><th>Property</th><th>District</th><th>Price</th><th>Area</th><th>Source</th><th>Date</th></tr></thead>
+                <thead><tr><th>Property</th><th>District</th><th>Listed Price</th><th>AI Predicted Price</th><th>Area</th><th>Source</th></tr></thead>
                 <tbody>
-                  <tr><td>Luxury apartment near West Lake</td><td>Ba Đình</td><td>4.8B</td><td>92 m²</td><td>Alonhadat</td><td>04 Jun</td></tr>
-                  <tr><td>Family townhouse in Kim Liên</td><td>Đống Đa</td><td>3.2B</td><td>120 m²</td><td>Homedy</td><td>03 Jun</td></tr>
-                  <tr><td>Studio near metro line 3</td><td>Hai Bà Trưng</td><td>1.7B</td><td>48 m²</td><td>Nhadat24h</td><td>03 Jun</td></tr>
+                  {% for p in properties %}
+                  <tr>
+                    <td>{{ p.title }}</td>
+                    <td>{{ p.district }}</td>
+                    <td>{{ p.price_text or p.price ~ ' tỷ' }}</td>
+                    <td>
+                      {% if p.ai_predicted_price %}
+                        <span class="badge badge-info">{{ p.ai_predicted_price }} tỷ</span>
+                      {% else %}
+                        <span class="muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ p.area_text or p.area ~ ' m²' }}</td>
+                    <td>{{ p.source }}</td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="6" class="muted">No properties found. Please run data collection.</td></tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -99,6 +114,25 @@
       </main>
     </div>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      if (analyzeBtn) {
+        analyzeBtn.addEventListener('click', async () => {
+          analyzeBtn.disabled = true;
+          analyzeBtn.textContent = 'Analyzing...';
+          try {
+            const res = await fetch('/api/analyze-prices', {method: 'POST'});
+            const data = await res.json();
+            alert(data.message);
+            window.location.reload();
+          } catch(e) {
+            alert('Error: ' + e);
+          }
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = 'Analyze Prices (AI)';
+        });
+      }
+    </script>
     <script>
       const typeChart = new Chart(document.getElementById('typeChart'), {
         type: 'doughnut',

@@ -18,30 +18,34 @@ class PropertyRepository:
                     row.get('listing_date'),
                     row.get('source'),
                     row.get('url'),
+                    row.get('ai_predicted_price'),
                 ))
                 continue
 
             values = tuple(row)
             if len(values) == 5:
                 title, district, price, area, source = values
-                values = (title, district, district, price, None, area, None, None, None, source, None)
+                values = (title, district, district, price, None, area, None, None, None, source, None, None)
             elif len(values) == 6:
                 title, district, price, area, source, url = values
-                values = (title, district, district, price, None, area, None, None, None, source, url)
+                values = (title, district, district, price, None, area, None, None, None, source, url, None)
             elif len(values) == 7:
                 title, district, address, price, area, source, url = values
-                values = (title, district, address, price, None, area, None, None, None, source, url)
+                values = (title, district, address, price, None, area, None, None, None, source, url, None)
             elif len(values) == 9:
                 title, district, address, price, price_text, area, area_text, source, url = values
-                values = (title, district, address, price, price_text, area, area_text, None, None, source, url)
+                values = (title, district, address, price, price_text, area, area_text, None, None, source, url, None)
+            elif len(values) == 11:
+                title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url = values
+                values = (title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url, None)
             normalised_rows.append(values)
 
         conn = get_connection()
         try:
             conn.executemany(
                 """
-                INSERT INTO properties (title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO properties (title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url, ai_predicted_price)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 normalised_rows,
             )
