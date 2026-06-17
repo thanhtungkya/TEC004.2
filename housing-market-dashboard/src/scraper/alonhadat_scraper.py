@@ -12,7 +12,7 @@ from src.scraper.selenium_scraper import (
     HANOI_DISTRICTS,
 )
 
-ALONHADAT_URL = 'https://alonhadat.com.vn/'
+ALONHADAT_URL = 'https://alonhadat.com.vn/can-ban-nha-dat/ha-noi'
 
 
 def _fetch_detail_listing_date(url: str) -> str:
@@ -23,12 +23,11 @@ def _fetch_detail_listing_date(url: str) -> str:
     return ''
 
 
-def scrape_alonhadat(progress_cb=None, abort_event=None):
+def scrape_alonhadat(progress_cb=None, log_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         ALONHADAT_URL,
-        '.vip-properties .vip-title a[href$=".html"]',
-        '.vip-properties article.item',
+        'a.link.vip'
     )
 
     seen_urls = set()
@@ -55,7 +54,8 @@ def scrape_alonhadat(progress_cb=None, abort_event=None):
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned) or _fetch_detail_listing_date(url)
 
-        records.append({
+        try:
+            records.append({
             'title': title[:120],
             'district': district,
             'address': address or district,
@@ -68,7 +68,12 @@ def scrape_alonhadat(progress_cb=None, abort_event=None):
             'source': 'alonhadat',
             'url': url,
         })
-        if progress_cb:
-            progress_cb('alonhadat')
+            if progress_cb:
+                progress_cb('alonhadat')
+            if log_cb:
+                log_cb('alonhadat', 'Success', url)
+        except Exception as exc:
+            if log_cb:
+                log_cb('alonhadat', 'Fail', f"{url} - {exc}")
 
     return records[:200]

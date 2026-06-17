@@ -20,6 +20,8 @@ function setStatus(text, type) {
 }
 
 let pollInterval = null;
+let lastLogCount = 0;
+
 
 async function checkProgress() {
   try {
@@ -27,18 +29,28 @@ async function checkProgress() {
     const data = await res.json();
     
     if (data.progress) {
-      if (document.getElementById('progressAlonhadat') && data.progress['alonhadat'] !== undefined) {
-        document.getElementById('progressAlonhadat').style.width = Math.min(100, (data.progress['alonhadat']/200)*100) + '%';
-        if (document.getElementById('countAlonhadat')) document.getElementById('countAlonhadat').textContent = data.progress['alonhadat'] + ' / 200';
+      const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland', '123nhadatviet'];
+      allSources.forEach(src => {
+        if (document.getElementById('progress' + src) && data.progress[src.toLowerCase()] !== undefined) {
+          document.getElementById('progress' + src).style.width = Math.min(100, (data.progress[src.toLowerCase()]/200)*100) + '%';
+          if (document.getElementById('count' + src)) {
+            document.getElementById('count' + src).textContent = data.progress[src.toLowerCase()] + ' / 200';
+          }
+        }
+      });
+    }
+
+    if (data.logs && data.logs.length > lastLogCount) {
+      for (let i = lastLogCount; i < data.logs.length; i++) {
+        const l = data.logs[i];
+        const item = document.createElement('li');
+        let badgeClass = 'badge-info';
+        if (l.status === 'Success') badgeClass = 'badge-success';
+        if (l.status === 'Fail') badgeClass = 'badge-warn';
+        item.innerHTML = `<span class="muted">[${l.time}]</span> <strong>${l.source}</strong>: <span class="badge ${badgeClass}" style="margin-left:4px; margin-right:4px;">${l.status}</span> ${l.message}`;
+        logList.prepend(item);
       }
-      if (document.getElementById('progressHomedy') && data.progress['homedy'] !== undefined) {
-        document.getElementById('progressHomedy').style.width = Math.min(100, (data.progress['homedy']/200)*100) + '%';
-        if (document.getElementById('countHomedy')) document.getElementById('countHomedy').textContent = data.progress['homedy'] + ' / 200';
-      }
-      if (document.getElementById('progressNhadat24h') && data.progress['nhadat24h'] !== undefined) {
-        document.getElementById('progressNhadat24h').style.width = Math.min(100, (data.progress['nhadat24h']/200)*100) + '%';
-        if (document.getElementById('countNhadat24h')) document.getElementById('countNhadat24h').textContent = data.progress['nhadat24h'] + ' / 200';
-      }
+      lastLogCount = data.logs.length;
     }
     
     if (!data.is_running) {
@@ -58,11 +70,19 @@ if (startBtn) {
   startBtn.addEventListener('click', async () => {
     const sources = Array.from(sourceOptions.querySelectorAll('input:checked')).map((box) => box.value);
     setStatus('Collecting…', 'badge-live');
+    if (logList) logList.innerHTML = '';
+    lastLogCount = 0;
     log(`Starting collection for ${sources.join(', ')} with keyword "${keywordInput.value}".`);
     
-    if (document.getElementById('progressAlonhadat')) { document.getElementById('progressAlonhadat').style.width = '0%'; if (document.getElementById('countAlonhadat')) document.getElementById('countAlonhadat').textContent = '0 / 200'; }
-    if (document.getElementById('progressHomedy')) { document.getElementById('progressHomedy').style.width = '0%'; if (document.getElementById('countHomedy')) document.getElementById('countHomedy').textContent = '0 / 200'; }
-    if (document.getElementById('progressNhadat24h')) { document.getElementById('progressNhadat24h').style.width = '0%'; if (document.getElementById('countNhadat24h')) document.getElementById('countNhadat24h').textContent = '0 / 200'; }
+    const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland', '123nhadatviet'];
+    allSources.forEach(src => {
+      if (document.getElementById('progress' + src)) {
+        document.getElementById('progress' + src).style.width = '0%';
+        if (document.getElementById('count' + src)) {
+          document.getElementById('count' + src).textContent = '0 / 200';
+        }
+      }
+    });
     
     startBtn.disabled = true;
     

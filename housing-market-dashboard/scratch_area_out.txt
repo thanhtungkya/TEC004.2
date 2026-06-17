@@ -1,0 +1,10 @@
+58m                                      -> 58.0
+Bán Nhà Chính Chủ Mặt Phố Tạ Hiện Hoàn K -> 58.0
+DT:70Mx5T                                -> 70.0
+50m2                                     -> 50.0
+35m2                                     -> 35.0
+Bán nhà Xuân Thủy – Cầu Giấy 53m2 – MT5m -> 53.0
+Bán nhà Nguyễn Chính Hoàng Mai, 50m2, 5T -> 50.0
+150 m²                                   -> 150.0
+Diện tích 65.5m                          -> 65.5
+Cách ô tô 50m                            -> 0.0

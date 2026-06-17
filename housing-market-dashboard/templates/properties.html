@@ -14,9 +14,13 @@
       </aside>
       <main class="main-panel">
         <header class="topbar">
-          <div><h1>Property Listings</h1><p>Search, filter, sort, and inspect high-value listings from the local database.</p></div>
+          <div>
+            <h1>Property Listings</h1>
+            <p>Search, filter, sort, and inspect high-value listings from the local database.</p>
+          </div>
           <div class="topbar-actions">
             <span class="chip">{{ pagination.total }} live listings</span>
+            <button id="cleanDataBtn" class="btn btn-warning" onclick="cleanData()">🧹 Clean Data</button>
             <a class="btn btn-primary" href="{{ url_for('export_properties_csv', **query_args) }}">Export CSV</a>
           </div>
         </header>
@@ -80,5 +84,28 @@
         </section>
       </main>
     </div>
+    <script>
+      async function cleanData() {
+        if (!confirm('This will re-process ALL price and area data in the database using the latest cleaning logic.\n\nProceed?')) return;
+        const btn = document.getElementById('cleanDataBtn');
+        const origText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '⏳ Cleaning...';
+        try {
+          const resp = await fetch('/api/clean-data', { method: 'POST' });
+          const data = await resp.json();
+          if (data.status === 'ok') {
+            btn.textContent = '✅ Cleaned ' + data.cleaned + ' records!';
+            setTimeout(() => location.reload(), 1200);
+          } else {
+            btn.textContent = '❌ Error';
+            setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
+          }
+        } catch (err) {
+          btn.textContent = '❌ ' + err.message;
+          setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
+        }
+      }
+    </script>
   </body>
 </html>

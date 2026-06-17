@@ -85,13 +85,12 @@ class DataCleaner:
         - Text columns (``district``, ``title``, ``source``): fill with
           ``"Unknown"``.
         """
-        # Numeric columns — median imputation
+        # Numeric columns — use 0.0 for missing values instead of median
+        # We don't want to fabricate 70m2 or average prices for properties
+        # where the scraper genuinely couldn't find the data.
         for col in ('price', 'area'):
             if col in df.columns:
-                median_val = df[col].median()
-                # If the entire column is NaN the median is NaN; fall back to 0
-                fill_val = median_val if pd.notna(median_val) else 0.0
-                df[col] = df[col].fillna(fill_val)
+                df[col] = df[col].fillna(0.0)
 
         # Text columns.  Pandas/SQLite data can contain real NaN values or the
         # literal string "nan"; neither should be rendered as user-facing text.

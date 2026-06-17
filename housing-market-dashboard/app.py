@@ -18,6 +18,7 @@ from src.services.openai_service import predict_prices
 from src.database.db_connection import get_connection
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Initialise the database once at import-time (not on every request).
 create_tables()
@@ -27,7 +28,8 @@ scraping_state = {
     "abort_event": None,
     "progress": {},
     "records_saved": 0,
-    "message": ""
+    "message": "",
+    "logs": []
 }
 
 
@@ -197,13 +199,74 @@ def export_properties_csv():
             "url": item.get("url") or "",
         })
     # Excel on Windows often guesses CSV files as ANSI unless a UTF-8 BOM is
-    # present, which turns Vietnamese text into mojibake like "PhÆ°á»ng".
+    # present, which turns Vietnamese text into mojibake like "Phường".
     csv_bytes = output.getvalue().encode("utf-8-sig")
     return Response(
         csv_bytes,
         content_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": "attachment; filename=property_listings.csv"},
     )
+
+
+@app.post("/api/clean-data")
+def clean_data():
+    """Re-process all existing records in the DB using the latest extraction
+    functions.  Fixes price_text (removes garbage text), price (numeric),
+    area (removes false 70m² defaults), and area_text.  Returns JSON with
+    the number of records cleaned."""
+    from src.scraper.selenium_scraper import (
+        normalise_price_text, extract_price, extract_area
+    )
+
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT id, title, price_text, area_text FROM properties"
+        ).fetchall()
+
+        cleaned = 0
+        for row in rows:
+            row_id = row["id"]
+            title = row["title"] or ""
+            old_price_text = row["price_text"] or ""
+            old_area_text = row["area_text"] or ""
+
+            # --- Re-clean price_text ---
+            # If the old price_text looks like it contains garbage (more than
+            # ~40 chars is a strong signal it's an entire card dump, not a
+            # clean price), re-extract from scratch.
+            new_price_text = old_price_text
+            if len(old_price_text) > 40 or not old_price_text:
+                new_price_text = normalise_price_text(old_price_text or title)
+            else:
+                # Even short strings may have issues; normalise anyway.
+                new_price_text = normalise_price_text(old_price_text)
+
+            new_price = extract_price(new_price_text) if new_price_text else 0.0
+
+            # --- Re-clean area ---
+            new_area = extract_area(old_area_text) if old_area_text else 0.0
+            if new_area == 0.0 and title:
+                new_area = extract_area(title)
+            # Clear area_text if we couldn't find a valid area
+            new_area_text = old_area_text
+            if new_area == 0.0:
+                new_area_text = ""
+
+            conn.execute(
+                """UPDATE properties
+                   SET price_text = ?, price = ?,
+                       area_text = ?, area = ?
+                 WHERE id = ?""",
+                (new_price_text, new_price, new_area_text, new_area, row_id),
+            )
+            cleaned += 1
+
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({"status": "ok", "cleaned": cleaned})
 
 
 def _filter_analytics_rows(rows, args):
@@ -367,10 +430,16 @@ def api_run_scraper():
     create_tables()
 
     selected = request.get_json(silent=True) or {}
-    requested_sources = [item.lower() for item in (selected.get("sources") or ["alonhadat", "homedy", "nhadat24h"])]
+    requested_sources = [item.lower() for item in (selected.get("sources") or [
+        "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot", 
+        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+    ])]
     keyword = (selected.get("keyword") or "").strip()
     district = (selected.get("district") or "").strip()
-    allowed_sources = ("alonhadat", "homedy", "nhadat24h")
+    allowed_sources = (
+        "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot", 
+        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+    )
     sources = [source for source in requested_sources if source in allowed_sources]
 
     if not sources:
@@ -384,7 +453,8 @@ def api_run_scraper():
         "message": "Starting...",
         "keyword": keyword,
         "district": district,
-        "sources": sources
+        "sources": sources,
+        "logs": []
     }
 
     def _scrape_worker():
@@ -392,8 +462,18 @@ def api_run_scraper():
         def _progress_cb(source_name):
             scraping_state["progress"][source_name] += 1
             
+        def _log_cb(source_name, status, message):
+            import datetime
+            ts = datetime.datetime.now().strftime("%H:%M:%S")
+            scraping_state["logs"].append({
+                "time": ts,
+                "source": source_name.capitalize(),
+                "status": status,
+                "message": message
+            })
+            
         try:
-            results = run_all_scrapers(sources, progress_cb=_progress_cb, abort_event=scraping_state["abort_event"])
+            results = run_all_scrapers(sources, progress_cb=_progress_cb, log_cb=_log_cb, abort_event=scraping_state["abort_event"])
         except Exception as exc:
             scraping_state["is_running"] = False
             scraping_state["message"] = f"Scraping failed: {exc}"
@@ -456,7 +536,8 @@ def api_scraper_status():
         "is_running": scraping_state.get("is_running", False),
         "progress": scraping_state.get("progress", {}),
         "records_saved": scraping_state.get("records_saved", 0),
-        "message": scraping_state.get("message", "")
+        "message": scraping_state.get("message", ""),
+        "logs": scraping_state.get("logs", [])
     })
 
 

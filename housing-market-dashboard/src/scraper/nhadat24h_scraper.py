@@ -11,15 +11,14 @@ from src.scraper.selenium_scraper import (
     HANOI_DISTRICTS,
 )
 
-NHADAT24H_URL = 'https://nhadat24h.net/ban-can-ho-chung-cu'
+NHADAT24H_URL = 'https://nhadat24h.net/nha-dat-ban-ha-noi'
 
 
-def scrape_nhadat24h(progress_cb=None, abort_event=None):
+def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         NHADAT24H_URL,
-        '.dv-item .dv-txt a[href*="-ID"]',
-        '.dv-item',
+        '.pn1 a', '.pn1'
     )
 
     seen_urls = set()
@@ -50,7 +49,8 @@ def scrape_nhadat24h(progress_cb=None, abort_event=None):
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
 
-        records.append({
+        try:
+            records.append({
             'title': title[:120],
             'district': district,
             'address': address or district,
@@ -63,7 +63,12 @@ def scrape_nhadat24h(progress_cb=None, abort_event=None):
             'source': 'nhadat24h',
             'url': url,
         })
-        if progress_cb:
-            progress_cb('nhadat24h')
+            if progress_cb:
+                progress_cb('nhadat24h')
+            if log_cb:
+                log_cb('nhadat24h', 'Success', url)
+        except Exception as exc:
+            if log_cb:
+                log_cb('nhadat24h', 'Fail', f"{url} - {exc}")
 
     return records[:200]

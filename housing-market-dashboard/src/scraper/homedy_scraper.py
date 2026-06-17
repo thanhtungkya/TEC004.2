@@ -9,15 +9,14 @@ from src.scraper.selenium_scraper import (
     HANOI_DISTRICTS,
 )
 
-HOMEDY_URL = 'https://homedy.com/ban-nha-rieng'
+HOMEDY_URL = 'https://homedy.com/ban-nha-rieng-ha-noi'
 
 
-def scrape_homedy(progress_cb=None, abort_event=None):
+def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None):
     records = []
     cards = render_listing_cards(
         HOMEDY_URL,
-        '.product-item a.title[href*="-es"]',
-        '.product-item',
+        '.product-item-top a[href]', '.product-item'
     )
 
     seen_urls = set()
@@ -42,7 +41,8 @@ def scrape_homedy(progress_cb=None, abort_event=None):
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
 
-        records.append({
+        try:
+            records.append({
             'title': title[:120],
             'district': district,
             'address': address or district,
@@ -55,7 +55,12 @@ def scrape_homedy(progress_cb=None, abort_event=None):
             'source': 'homedy',
             'url': url,
         })
-        if progress_cb:
-            progress_cb('homedy')
+            if progress_cb:
+                progress_cb('homedy')
+            if log_cb:
+                log_cb('homedy', 'Success', url)
+        except Exception as exc:
+            if log_cb:
+                log_cb('homedy', 'Fail', f"{url} - {exc}")
 
     return records[:200]

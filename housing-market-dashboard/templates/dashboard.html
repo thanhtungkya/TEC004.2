@@ -95,7 +95,19 @@
                     <td>{{ p.price_text or p.price ~ ' tỷ' }}</td>
                     <td>
                       {% if p.ai_predicted_price %}
-                        <span class="badge badge-info">{{ p.ai_predicted_price }} tỷ</span>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                          <span class="badge badge-info">{{ "%.2f"|format(p.ai_predicted_price) }} tỷ</span>
+                          {% if p.price and p.price > 0 %}
+                            {% set diff = p.ai_predicted_price - p.price %}
+                            {% if diff > 0 %}
+                              <span class="badge badge-success" style="font-size: 0.75rem;">Undervalued ({{ "%.2f"|format(diff) }} tỷ)</span>
+                            {% elif diff < 0 %}
+                              <span class="badge badge-warn" style="font-size: 0.75rem;">Overvalued ({{ "%.2f"|format(diff|abs) }} tỷ)</span>
+                            {% else %}
+                              <span class="badge" style="font-size: 0.75rem; color:#666;">Fair value</span>
+                            {% endif %}
+                          {% endif %}
+                        </div>
                       {% else %}
                         <span class="muted">-</span>
                       {% endif %}

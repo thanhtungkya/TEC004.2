@@ -1,0 +1,33 @@
+alonhadat: 8 records
+Sample: {'title': 'BÁN GẤP TOÀ NHÀ 8 TẦNG CẦU GIẤY DT70m2 LÔ GÓC 2 MẶT TIỀN ĐƯỜNG VỈA HÈ OTO DỪNG ĐỖ. 29 TỶ', 'district': 'Cầu Giấy', 'address': 'Cầu Giấy', 'price': 29000.0, 'price_text': '29 tỷ', 'area': 70.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '2026-06-17', 'source': 'alonhadat', 'url': 'https://alonhadat.com.vn/ban-gap-toa-nha-8-tang-cau-giay-dt70m2-lo-goc-2-mat-tien-duong-via-he-oto-dung-do-29-ty-18795813.html'}
+----------------------------------------
+batdongsan: 27 records
+Sample: {'title': '23 MỞ BÁN BIỆT THỰ LIỀN KỀ SHOPHOUSE CIPUTRA THIẾT KẾ ĐẸP, SỔ ĐỎ LÂU DÀI, GIÁ BÁN, CHÍNH SÁCH CỰC TỐT 52,5 tỷ · 150 m² ·', 'district': 'Tây Hồ', 'address': 'Tây Hồ', 'price': 52500.0, 'price_text': '52 tỷ 500 triệu', 'area': 150.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '2026-06-18', 'source': 'batdongsan', 'url': 'https://batdongsan.com.vn/ban-nha-biet-thu-lien-ke-phuong-phu-thuong-1-gia-by-kita/c-t-mo-ban-g-3-k-t-ciputra-co-thiet-ep-so-o-lau-dai-ban-va-chinh-sach-cuc-tot-pr45450323'}
+----------------------------------------
+bds123: 20 records
+Sample: {'title': '3 TIN VIP BÁN GẤP CHÍNH CHỦ CẦN BÁN NHÀ PHỐ BỒ ĐỀ - VỊ TRÍ ĐẸP - 5 PHÚT LÁI XE ĐẾN TRUNG TÂM THÀNH PHỐ… 18 tỷ 60 m² 3 3 ', 'district': 'Long Biên', 'address': 'Long Biên', 'price': 18000.0, 'price_text': '18 tỷ', 'area': 60.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '', 'source': 'bds123', 'url': 'https://bds123.vn/chinh-chu-can-ban-nha-pho-bo-de-vi-tri-dep-5-phut-lai-xe-den-trung-tam-thanh-pho-ha-noi-pr917833.html'}
+----------------------------------------
+homedy: 18 records
+Sample: {'title': '7', 'district': 'Hoàng Mai', 'address': 'Đường Tân Mai, Phường Tân Mai, Quận Hoàng Mai, Hà Nội', 'price': 10500.0, 'price_text': '10 tỷ 500 triệu', 'area': 38.0, 'area_text': '38 m2', 'property_type': 'Land', 'listing_date': '', 'source': 'homedy', 'url': 'https://homedy.com/ban-nha-rieng-quan-hoang-mai-ha-noi/tan-38m2-5-tang-vf3-do-cua-kinh-doanh-tot-ngo-thong-thoang-sang-gia-10-ty-es3209756'}
+----------------------------------------
+meeyland: 60 records
+Sample: {'title': 'Ruby 2+ Bán chung cư mini xây mới 50m2 tại Tân Triều, 7 tầng, 15căn, ngang 15m, giá 14,5 tỷ 7.4 H. Thanh Trì, Tp. Hà Nội', 'district': 'Thanh Trì', 'address': 'Thanh Trì', 'price': 14500.0, 'price_text': '14 tỷ 500 triệu', 'area': 50.0, 'area_text': '', 'property_type': 'Apartment', 'listing_date': '2026-06-12', 'source': 'meeyland', 'url': 'https://meeyland.com/ban-chung-cu-mini-thanh-tri-ha-noi-i1322/307378658'}
+----------------------------------------
+mogi: 5 records
+Sample: {'title': 'Nhà Xuân La Tây Hồ Ngõ ô tô 100m ra Ngoại giao đoàn. DT 50m MT 5m 1.5T', 'district': 'Tây Hồ', 'address': 'Tây Hồ', 'price': 0.0, 'price_text': 'Nhà Xuân La Tây Hồ Ngõ ô tô 100m ra Ngoại giao đoàn. DT 50m MT 5m 1.5T', 'area': 0.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '', 'source': 'mogi', 'url': 'https://mogi.vn/quan-tay-ho/mua-nha-hem-ngo/nha-xuan-la-tay-ho-ngo-o-to-100m-ra-ngoai-giao-doan-dt-50m-mt-5m-1-5t-id22579648'}
+----------------------------------------
+nhadat24h: 20 records
+Sample: {'title': 'TÔI CHÍNH CHỦ CẦN BÁN CHUNG CƯ HH1 LINH ĐÀM 66M GIÁ 2 TỶ 850', 'district': 'Hoàng Mai', 'address': 'Phường Thịnh Liệt, Quận Hoàng Mai', 'price': 2850.0, 'price_text': '2 tỷ 850 triệu', 'area': 66.0, 'area_text': '66 M²', 'property_type': 'Apartment', 'listing_date': '2026-06-18', 'source': 'nhadat24h', 'url': 'https://nhadat24h.net/ban-chung-cu-chung-cu-hh1-linh-dam/toi-chinh-chu-can-ban-chung-cu-hh1-linh-dam-66m-gia-2-ty-850-ID4378974'}
+----------------------------------------
+123nhadatviet: 3 records
+Sample: {'title': 'Bán Nhà Chính Chủ Dã Tượng Hoàn Kiếm 35m2 Rộng Thoáng', 'district': 'Hoàn Kiếm', 'address': 'Hoàn Kiếm', 'price': 0.0, 'price_text': 'Bán Nhà Chính Chủ Dã Tượng Hoàn Kiếm 35m2 Rộng Thoáng', 'area': 35.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '', 'source': '123nhadatviet', 'url': 'https://123nhadatviet.com/ban-nha-chinh-chu-da-tuong-hoan-kiem-35m2-rong-thoang-6972789.html'}
+----------------------------------------
+nhaongay: 12 records
+Sample: {'title': 'Suất ngoại giao căn 2 phòng ngủ chiết khấu 15% dự án Vista Văn La', 'district': 'Hà Đông', 'address': 'Hà Đông', 'price': 5000.0, 'price_text': '5 tỷ', 'area': 61.0, 'area_text': '', 'property_type': 'Apartment', 'listing_date': '2026-06-17', 'source': 'nhaongay', 'url': 'http://nhaongay.vn/ban-can-ho-chung-cu/suat-ngoai-giao-can-2-phong-ngu-chiet-khau-15-du-an-vista-van-la'}
+----------------------------------------
+nhatot: 25 records
+Sample: {'title': '+2 Tin ưu tiên 9 tôi chính chủ bán nhà 5 tầng mới phố cổ quận Long biên 3 PN Hướng Tây Nam Nhà ngõ, hẻm 9 tỷ 257 tr/m² 3', 'district': 'Long Biên', 'address': 'Long Biên', 'price': 9000.0, 'price_text': '9 tỷ', 'area': 35.0, 'area_text': '', 'property_type': 'Apartment', 'listing_date': '', 'source': 'nhatot', 'url': 'https://www.nhatot.com/mua-ban-nha-dat-quan-long-bien-ha-noi/129628407.htm#px=SR-stickyad-[PO-1][PL-top]'}
+----------------------------------------
+sosanhnha: 7 records
+Sample: {'title': 'Bán nhà phố lạc trung, hai bà trưng 54m, 8 tầng, mt 4.2m. giá: 30.3 tỷ. lh: 0937158386', 'district': 'Hai Bà Trưng', 'address': 'Hai Bà Trưng', 'price': 30300.0, 'price_text': '30 tỷ 300 triệu', 'area': 0.0, 'area_text': '', 'property_type': 'Land', 'listing_date': '', 'source': 'sosanhnha', 'url': 'https://sosanhnha.vn/ban-nha-pho-lac-trung-hai-ba-trung-54m-8-tang-mt-4-2m-gia-30-3-ty-lh-0937158386-pid243541'}
+----------------------------------------

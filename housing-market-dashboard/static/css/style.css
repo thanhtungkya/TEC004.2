@@ -48,6 +48,8 @@ button, input, select { font: inherit; }
 .btn-primary { background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; box-shadow: 0 10px 18px rgba(37,99,235,.25); }
 .btn-secondary { background: white; color: var(--ink); border: 1px solid var(--line); }
 .btn-success { background: var(--success); color: white; }
+.btn-warning { background: linear-gradient(135deg, #f59e0b, #f97316); color: white; box-shadow: 0 10px 18px rgba(245,158,11,.25); }
+.btn-warning:disabled { opacity: .65; cursor: not-allowed; }
 .page-content { padding: 26px; display:grid; gap: 22px; }
 .kpi-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .card { background: var(--surface); border:1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: 0 18px 30px rgba(15,23,42,0.08); }

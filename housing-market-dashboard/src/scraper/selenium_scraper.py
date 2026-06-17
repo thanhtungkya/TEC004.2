@@ -1,9 +1,12 @@
 import re
 import logging
 from datetime import date, timedelta
+import time
+import random
 from typing import Optional
 
-from playwright.sync_api import sync_playwright
+from seleniumbase import Driver
+from selenium.webdriver.common.by import By
 
 logger = logging.getLogger(__name__)
 
@@ -16,74 +19,50 @@ HANOI_DISTRICTS = {
 }
 
 
-def _new_page(browser):
-    return browser.new_page(
-        user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/126.0.0.0 Safari/537.36"
-        )
-    )
+def _get_driver():
+    """Return a patched SeleniumBase driver."""
+    return Driver(uc=True, headless=True)
 
 
 def render_page(url: str, selector: str):
     """
-    Launch a headless Chromium browser via Playwright, navigate to *url*,
+    Launch an undetected Chromium browser via SeleniumBase, navigate to *url*,
     and return the inner-text of every element matching *selector*.
-
-    On Windows the Playwright event-loop can clash with Flask's reloader
-    (``--debug``), so we guard every step with explicit error handling and
-    keep the browser life-cycle as short as possible.
     """
-    pw = None
-    browser = None
+    driver = None
     try:
-        pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
-        page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(2000)                       # let JS render
-        texts = page.locator(selector).all_inner_texts()
+        driver = _get_driver()
+        driver.get(url)
+        time.sleep(random.uniform(2.5, 4.5))              # human-like pause
+        els = driver.find_elements(By.CSS_SELECTOR, selector)
+        texts = [el.text for el in els]
         return texts
     except Exception as exc:
         logger.error("render_page(%s) failed: %s", url, exc)
         return []                                         # graceful fallback
     finally:
         try:
-            if browser:
-                browser.close()
-        except Exception:
-            pass
-        try:
-            if pw:
-                pw.stop()
+            if driver:
+                driver.quit()
         except Exception:
             pass
 
 
 def fetch_page_text(url: str) -> str:
     """Fetch rendered page body text for detail-page metadata extraction."""
-    pw = None
-    browser = None
+    driver = None
     try:
-        pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
-        page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(2000)
-        return page.locator("body").inner_text(timeout=10_000)
+        driver = _get_driver()
+        driver.get(url)
+        time.sleep(random.uniform(2.5, 4.5))
+        return driver.find_element(By.TAG_NAME, "body").text
     except Exception as exc:
         logger.error("fetch_page_text(%s) failed: %s", url, exc)
         return ""
     finally:
         try:
-            if browser:
-                browser.close()
-        except Exception:
-            pass
-        try:
-            if pw:
-                pw.stop()
+            if driver:
+                driver.quit()
         except Exception:
             pass
 
@@ -97,44 +76,65 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
     *card_selector* to collect the full listing card text while keeping the
     exact anchor href.
     """
-    pw = None
-    browser = None
+    driver = None
     try:
-        pw = sync_playwright().start()
-        browser = pw.chromium.launch(headless=True)
-        page = _new_page(browser)
-        page.goto(url, wait_until="load", timeout=120_000)
-        page.wait_for_timeout(3000)
-        return page.locator(selector).evaluate_all(
-            """
-            (els, cardSelector) => els.map(el => {
-                const card = cardSelector ? el.closest(cardSelector) : null;
-                const textNode = card || el;
-                return {
-                    text: (textNode.innerText || textNode.textContent || '').trim(),
-                    title: (el.innerText || el.textContent || '').trim(),
-                    url: el.href || null,
-                    price_text: (textNode.querySelector('.price, .a-txt-cl1, .vip-price, [class*=price]')?.innerText || '').replace(/^Giá:\\s*/i, '').trim(),
-                    area_text: (textNode.querySelector('.acreage, .a-txt-cl2, .vip-kt, .acr, [class*=acreage]')?.innerText || '').replace(/^DT:\\s*/i, '').trim(),
-                    address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address')?.innerText || '').trim(),
-                    listing_date_text: (textNode.querySelector('.date, .time, [class*=date], [class*=time]')?.innerText || '').trim()
-                };
-            })
-            """,
-            card_selector,
-        )
+        driver = _get_driver()
+        driver.get(url)
+        time.sleep(random.uniform(3.0, 5.5))
+        
+        js_code = """
+        const els = Array.from(document.querySelectorAll(arguments[0]));
+        const cardSelector = arguments[1];
+        return els.map(el => {
+            const card = cardSelector ? el.closest(cardSelector) : null;
+            const textNode = card || el;
+            const fullText = (textNode.innerText || textNode.textContent || '').trim();
+
+            // --- Price extraction ---
+            // Try known CSS selectors first
+            let price = '';
+            const priceEl = textNode.querySelector('.price, .a-txt-cl1, .vip-price, [class*=price], .gia, [class*=gia]');
+            if (priceEl) {
+                price = priceEl.innerText.replace(/^Giá:\\s*/i, '').trim();
+            }
+            // Regex fallback on fullText if CSS found nothing
+            if (!price) {
+                const pm = fullText.match(/(\\d+(?:[\\s.,]\\d+)*)\\s*(tỷ|ty|triệu|tr)\\b/i);
+                if (pm) price = pm[0].trim();
+            }
+
+            // --- Area extraction ---
+            let area = '';
+            const areaEl = textNode.querySelector('.acreage, .a-txt-cl2, .vip-kt, .acr, [class*=acreage], [class*=area], .dien-tich');
+            if (areaEl) {
+                area = areaEl.innerText.replace(/^DT:\\s*/i, '').trim();
+            }
+            if (!area) {
+                // Regex: look for a number directly followed by m²/m2 (not part of "70Mx5T")
+                const am = fullText.match(/(\\d{1,5}(?:[.,]\\d{1,2})?)\\s*(?:m2|m²)(?!\\w)/i);
+                if (am) area = am[0].trim();
+            }
+
+            return {
+                text: fullText,
+                title: (el.innerText || el.textContent || '').trim(),
+                url: el.href || null,
+                price_text: price,
+                area_text: area,
+                address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address, .location')?.innerText || '').trim(),
+                listing_date_text: (textNode.querySelector('.date, .time, [class*=date], [class*=time]')?.innerText || '').trim()
+            };
+        });
+        """
+        results = driver.execute_script(js_code, selector, card_selector)
+        return results if results else []
     except Exception as exc:
         logger.error("render_listing_cards(%s) failed: %s", url, exc)
         return []
     finally:
         try:
-            if browser:
-                browser.close()
-        except Exception:
-            pass
-        try:
-            if pw:
-                pw.stop()
+            if driver:
+                driver.quit()
         except Exception:
             pass
 
@@ -156,6 +156,12 @@ def _parse_vietnamese_amount(amount_text: str, unit: str) -> float:
 
 
 def normalise_price_text(text: str):
+    """Extract and normalise the first Vietnamese price from *text*.
+
+    Returns a clean, human-readable price string like '8 tỷ 250 triệu'
+    or '' when no price can be extracted.
+    NEVER returns raw/unstructured text.
+    """
     raw = ' '.join(str(text or '').split()).strip()
     if not raw:
         return ''
@@ -165,7 +171,9 @@ def normalise_price_text(text: str):
 
     match = re.search(r'(\d+(?:[\s.,]\d+)*)\s*(tỷ|ty|triệu|tr)\b', raw, flags=re.I)
     if not match:
-        return raw
+        # No recognisable Vietnamese price pattern found – return empty
+        # instead of dumping the raw text into the price column.
+        return ''
 
     amount = match.group(1).strip()
     unit = match.group(2).lower()
@@ -207,22 +215,66 @@ def extract_price(text: str):
 
 
 def extract_area(text: str):
-    match = re.search(r'(\d+(?:[.,]\d+)?)\s*(m2|m²)', text, flags=re.I)
-    if not match:
+    """Extract area in m² from *text*.
+
+    Matches real area patterns like '150 m²', '65.5m2', '66M²', 'DT 70m', '70Mx5T'.
+    Smartly extracts isolated formats like '58m' if context suggests it's an area,
+    but avoids facade sizes or distances like 'Mặt tiền 5m' or 'Cách ô tô 20m'.
+    Returns 0.0 when no valid area is found.
+    """
+    if not text:
         return 0.0
-    return float(match.group(1).replace('.', '').replace(',', '.'))
+
+    def _parse_area_number(s: str) -> float:
+        """Parse a number that may use . or , as decimal or thousands sep."""
+        s = s.strip()
+        if ',' in s:
+            s = s.replace(',', '.')
+        parts = s.split('.')
+        if len(parts) == 2 and len(parts[1]) == 3:
+            return float(parts[0] + parts[1])
+        return float(s)
+
+    # 1. Standard: number directly followed by m² / m2.
+    m1 = re.search(r'(?<!\d)(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:m2|m²)(?!\w)', text, flags=re.I)
+    if m1:
+        val = _parse_area_number(m1.group(1))
+        if 5 <= val <= 10000: return val
+
+    # 2. Prefix: 'Diện tích', 'DT', 'Dtich', 'S' followed by a number and an optional 'm'
+    m2 = re.search(r'(?:diện tích|dtich|dt|s)\s*:?\s*(\d{1,5}(?:[.,]\d{1,2})?)\s*m?(?!\w)', text, flags=re.I)
+    if m2:
+        val = _parse_area_number(m2.group(1))
+        if 5 <= val <= 10000: return val
+
+    # 3. Multiplier: '70Mx5T' or '70m x 5 tầng'
+    m3 = re.search(r'(?<!\d)(\d{1,5}(?:[.,]\d{1,2})?)\s*m\s*[x\*]\s*\d+\s*(?:T|tầng)', text, flags=re.I)
+    if m3:
+        val = _parse_area_number(m3.group(1))
+        if 5 <= val <= 10000: return val
+
+    # 4. Dangerous Fallback: catch isolated \d+m if it's reasonably large (>= 15)
+    # and not preceded by facade/distance words ('mt', 'mặt tiền', 'ngõ', 'đường', 'cách', 'rộng', 'sâu')
+    m4 = re.search(r'(?<!\d)(\d{2,5}(?:[.,]\d{1,2})?)\s*m\b', text, flags=re.I)
+    if m4:
+        val = _parse_area_number(m4.group(1))
+        idx = m4.start()
+        context_before = text[max(0, idx-20):idx].lower()
+        avoid_words = ['mt', 'tiền', 'ngõ', 'đường', 'cách', 'rộng', 'sâu', 'vào']
+        if not any(w in context_before for w in avoid_words):
+            if 15 <= val <= 10000:
+                return val
+
+    return 0.0
 
 
 def extract_district(text: str):
-    for pattern in [
-        r'(?:Quận|Huyện|Thành phố|\bTP\.?)\s*[^,|\-–—]+',
-        r'Đống Đa|Ba Đình|Hoàn Kiếm|Hai Bà Trưng|Thanh Xuân|Cầu Giấy|Tây Hồ|Hoàng Mai|Long Biên|Hà Đông|Nam Từ Liêm|Bắc Từ Liêm|Đông Anh|Gia Lâm|Hoài Đức|Thanh Trì',
-        r'Tỉnh\s[^,|\-–—]+',
-        r'Phường\s[^,|\-–—]+',
-    ]:
-        match = re.search(pattern, text, flags=re.I)
-        if match:
-            return match.group(0).strip()
+    if not text:
+        return 'Unknown'
+    text_lower = text.lower()
+    for d in HANOI_DISTRICTS:
+        if d.lower() in text_lower:
+            return d
     return 'Unknown'
 
 
