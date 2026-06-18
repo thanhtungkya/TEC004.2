@@ -99,7 +99,7 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
             }
             // Regex fallback on fullText if CSS found nothing
             if (!price) {
-                const pm = fullText.match(/(\\d+(?:[\\s.,]\\d+)*)\\s*(tỷ|ty|triệu|tr)\\b/i);
+                const pm = fullText.match(/(\\d+(?:[\\s.,]\\d+)*)\\s*(tỷ|ty|triệu|tr)\\b(?!\\s*(?:\\/|trên)\\s*m)/i);
                 if (pm) price = pm[0].trim();
             }
 
@@ -107,7 +107,7 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
             let area = '';
             const areaEl = textNode.querySelector('.acreage, .a-txt-cl2, .vip-kt, .acr, [class*=acreage], [class*=area], .dien-tich');
             if (areaEl) {
-                area = areaEl.innerText.replace(/^DT:\\s*/i, '').trim();
+                area = areaEl.innerText.replace(/^DT:\\s*/i, '').replace(/[·•]/g, '').trim();
             }
             if (!area) {
                 // Regex: look for a number directly followed by m²/m2 (not part of "70Mx5T")
@@ -141,6 +141,10 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
 
 def _parse_vietnamese_amount(amount_text: str, unit: str) -> float:
     clean = str(amount_text or '').strip()
+    parts = clean.split(' ')
+    if len(parts) > 1 and (',' in parts[-1] or '.' in parts[-1]):
+        clean = parts[-1]
+
     compact = clean.replace(' ', '')
     unit = (unit or '').lower()
     if unit in ('tỷ', 'ty'):
@@ -169,7 +173,7 @@ def normalise_price_text(text: str):
     if 'thỏa' in lowered or 'thoả' in lowered:
         return 'Thỏa thuận'
 
-    match = re.search(r'(\d+(?:[\s.,]\d+)*)\s*(tỷ|ty|triệu|tr)\b', raw, flags=re.I)
+    match = re.search(r'(\d+(?:[\s.,]\d+)*)\s*(tỷ|ty|triệu|tr)\b(?!\s*(?:/|trên)\s*(?:m|th|tháng))', raw, flags=re.I)
     if not match:
         # No recognisable Vietnamese price pattern found – return empty
         # instead of dumping the raw text into the price column.
@@ -177,6 +181,11 @@ def normalise_price_text(text: str):
 
     amount = match.group(1).strip()
     unit = match.group(2).lower()
+    
+    parts = amount.split(' ')
+    if len(parts) > 1 and (',' in parts[-1] or '.' in parts[-1]):
+        amount = parts[-1]
+
     if unit in ('triệu', 'tr'):
         return f"{amount.replace('.', ',')} triệu"
 
@@ -202,7 +211,7 @@ def extract_price(text: str):
 
     total = 0.0
     found = False
-    for match in re.finditer(r'(\d+(?:\s\d+)*(?:[.,]\d+)?)\s*(tỷ|ty|triệu|tr)\b', clean_text, flags=re.I):
+    for match in re.finditer(r'(\d+(?:\s\d+)*(?:[.,]\d+)?)\s*(tỷ|ty|triệu|tr)\b(?!\s*(?:/|trên)\s*(?:m|th|tháng))', clean_text, flags=re.I):
         found = True
         amount_text = match.group(1)
         unit = match.group(2).lower()

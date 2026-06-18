@@ -126,3 +126,22 @@ if (stopBtn) {
     }
   });
 }
+
+// Check scraper state on page load to resume UI if running
+async function initScraperState() {
+  try {
+    const res = await fetch('/api/scraper-status');
+    const data = await res.json();
+    if (data.is_running) {
+      setStatus('Collecting…', 'badge-live');
+      if (startBtn) startBtn.disabled = true;
+      lastLogCount = 0; // force loading existing logs
+      checkProgress(); // do an immediate UI update
+      pollInterval = setInterval(checkProgress, 1000);
+    }
+  } catch (e) {
+    console.error('Failed to init scraper state', e);
+  }
+}
+
+initScraperState();

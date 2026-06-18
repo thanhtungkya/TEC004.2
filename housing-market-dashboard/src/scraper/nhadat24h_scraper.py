@@ -39,8 +39,7 @@ def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
         district = extract_district(address or cleaned)
         if district not in HANOI_DISTRICTS:
             continue
-        raw_price = item.get('price_text') or cleaned
-        price_text = normalise_price_text(raw_price)
+        price_text = normalise_price_text(item.get('price_text')) or normalise_price_text(cleaned)
         # Nhadat24h sometimes drops the separator in the compact price element
         # (e.g. "1920 Tỷ" while the title/card says "1,920TỶ"). If that
         # happens, prefer the title/card text so we display "1 tỷ 920 triệu".

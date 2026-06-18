@@ -25,7 +25,7 @@ def scrape_sosanhnha(progress_cb=None, log_cb=None, abort_event=None):
         address = ' '.join((item.get('address') or '').split())
         district = extract_district(address or cleaned)
         if district not in HANOI_DISTRICTS: continue
-        price_text = normalise_price_text(item.get('price_text') or cleaned)
+        price_text = normalise_price_text(item.get('price_text')) or normalise_price_text(cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
         listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
         try:

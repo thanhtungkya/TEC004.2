@@ -221,7 +221,7 @@ def clean_data():
     conn = get_connection()
     try:
         rows = conn.execute(
-            "SELECT id, title, price_text, area_text FROM properties"
+            "SELECT id, title, price_text, area_text, url, source, property_type, address, district, listing_date FROM properties"
         ).fetchall()
 
         cleaned = 0
@@ -230,6 +230,10 @@ def clean_data():
             title = row["title"] or ""
             old_price_text = row["price_text"] or ""
             old_area_text = row["area_text"] or ""
+            url = row["url"] or ""
+            source = row["source"] or ""
+            property_type = row["property_type"] or ""
+            address = row["address"] or ""
 
             # --- Re-clean price_text ---
             # If the old price_text looks like it contains garbage (more than
@@ -242,6 +246,10 @@ def clean_data():
                 # Even short strings may have issues; normalise anyway.
                 new_price_text = normalise_price_text(old_price_text)
 
+            # Fallback to title if normalisation yielded no valid price
+            if not new_price_text and title:
+                new_price_text = normalise_price_text(title)
+
             new_price = extract_price(new_price_text) if new_price_text else 0.0
 
             # --- Re-clean area ---
@@ -249,9 +257,33 @@ def clean_data():
             if new_area == 0.0 and title:
                 new_area = extract_area(title)
             # Clear area_text if we couldn't find a valid area
-            new_area_text = old_area_text
-            if new_area == 0.0:
-                new_area_text = ""
+            new_area_text = old_area_text.replace('·', '').replace('•', '').strip() if old_area_text else ''
+            # --- Identify missing fields for deletion ---
+            needs_rescrape = False
+            if not title or title.strip() == '' or title.strip() == 'Untitled listing': needs_rescrape = True
+            if not address or address.strip() == '' or address.strip() == 'Unknown': needs_rescrape = True
+            if new_price < 1000.0: needs_rescrape = True
+            if new_area == 0.0: needs_rescrape = True
+            if not property_type or property_type.strip() == '' or property_type.strip() == 'Unknown': needs_rescrape = True
+
+            if needs_rescrape and url:
+                import os, json
+                retry_file = os.path.join(os.path.dirname(__file__), "retry_urls.json")
+                try:
+                    with open(retry_file, "r", encoding="utf-8") as f:
+                        retry_list = json.load(f)
+                except (FileNotFoundError, json.JSONDecodeError):
+                    retry_list = []
+                
+                # Check if already in list
+                if not any(item["url"] == url for item in retry_list):
+                    retry_list.append({
+                        "title": title, "address": address, "url": url, 
+                        "source": source, "property_type": property_type,
+                        "district": dict(row).get("district", ""), "listing_date": dict(row).get("listing_date", "")
+                    })
+                    with open(retry_file, "w", encoding="utf-8") as f:
+                        json.dump(retry_list, f, ensure_ascii=False, indent=2)
 
             conn.execute(
                 """UPDATE properties
@@ -266,7 +298,7 @@ def clean_data():
             """DELETE FROM properties 
                WHERE title IS NULL OR TRIM(title) = '' OR TRIM(title) = 'Untitled listing'
                   OR address IS NULL OR TRIM(address) = '' OR TRIM(address) = 'Unknown'
-                  OR price IS NULL OR price = 0
+                  OR price IS NULL OR price < 1000
                   OR area IS NULL OR area = 0
                   OR property_type IS NULL OR TRIM(property_type) = '' OR TRIM(property_type) = 'Unknown'
                   OR source IS NULL OR TRIM(source) = '' OR TRIM(source) = 'unknown'"""
@@ -521,15 +553,81 @@ def api_run_scraper():
                     "url": url,
                 })
 
-        if collected:
-            try:
-                PropertyRepository().insert_many(collected)
-                scraping_state["records_saved"] = len(collected)
-                scraping_state["message"] = f"Collected {len(collected)} listings from {', '.join(sources)}."
-            except Exception as exc:
-                scraping_state["message"] = f"Database update failed: {exc}"
+        # --- Process Retry URLs ---
+        import os, json
+        retry_file = os.path.join(os.path.dirname(__file__), "retry_urls.json")
+        try:
+            with open(retry_file, "r", encoding="utf-8") as f:
+                retry_list = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            retry_list = []
+
+        if retry_list and not scraping_state["abort_event"].is_set():
+            scraping_state["message"] = f"Rescraping {len(retry_list)} failed links..."
+            from src.scraper.selenium_scraper import fetch_page_text, extract_address, classify_property_type, normalise_price_text, extract_price, extract_area
+            remaining_retry = []
+            rescraped_collected = []
+            
+            for item in retry_list:
+                if scraping_state["abort_event"].is_set():
+                    remaining_retry.append(item)
+                    continue
+                
+                url = item.get("url")
+                if not url: continue
+                
+                page_text = fetch_page_text(url)
+                if not page_text:
+                    remaining_retry.append(item)
+                    continue
+                
+                new_price_text = normalise_price_text(page_text)
+                new_price = extract_price(new_price_text) if new_price_text else 0.0
+                new_area = extract_area(page_text)
+                new_area_text = f"{new_area} m²" if new_area > 0 else ""
+                
+                new_address = item.get("address", "")
+                if not new_address or new_address == "Unknown":
+                    new_address = extract_address(page_text)
+                
+                new_type = item.get("property_type", "")
+                if not new_type or new_type == "Unknown":
+                    new_type = classify_property_type(page_text, url)
+
+                # If still invalid, keep it in retry list
+                if new_price == 0.0 or new_area == 0.0:
+                    remaining_retry.append(item)
+                    continue
+
+                rescraped_collected.append({
+                    "title": item.get("title", "Untitled listing"),
+                    "district": item.get("district", district or "Unknown"),
+                    "address": new_address,
+                    "price": new_price,
+                    "price_text": new_price_text,
+                    "area": new_area,
+                    "area_text": new_area_text,
+                    "property_type": new_type,
+                    "listing_date": item.get("listing_date", ""),
+                    "source": item.get("source", "unknown"),
+                    "url": url,
+                })
+                _log_cb("Retry", "success", f"Rescraped {url}")
+
+            if rescraped_collected:
+                try:
+                    PropertyRepository().insert_many(rescraped_collected)
+                    scraping_state["records_saved"] += len(rescraped_collected)
+                except Exception as exc:
+                    logger.error("Failed to insert rescraped records: %s", exc)
+
+            with open(retry_file, "w", encoding="utf-8") as f:
+                json.dump(remaining_retry, f, ensure_ascii=False, indent=2)
+
+        if collected or rescraped_collected:
+            scraping_state["message"] = f"Collected {len(collected)} and rescraped {len(rescraped_collected)} listings."
         else:
-            scraping_state["message"] = f"Collected 0 listings from {', '.join(sources)}."
+            scraping_state["message"] = f"Collected 0 listings."
             
         scraping_state["is_running"] = False
 
