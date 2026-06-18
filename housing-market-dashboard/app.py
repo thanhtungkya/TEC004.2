@@ -4,7 +4,6 @@ import math
 from datetime import datetime
 from io import StringIO
 import threading
-import app
 
 from flask import Flask, Response, jsonify, render_template, request
 
