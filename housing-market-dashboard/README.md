@@ -1,6 +1,6 @@
 # Housing Market Dashboard
 
-A starter Python project for scraping, cleaning, storing, and visualizing Vietnam housing market listings.
+A starter Python project for scraping, cleaning, storing, and visualizing Hanoi housing market listings.
 
 ## Features
 - Data collection modules for sample sources
