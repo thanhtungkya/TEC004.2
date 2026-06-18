@@ -262,11 +262,22 @@ def clean_data():
             )
             cleaned += 1
 
+        deleted_cursor = conn.execute(
+            """DELETE FROM properties 
+               WHERE title IS NULL OR TRIM(title) = '' OR TRIM(title) = 'Untitled listing'
+                  OR address IS NULL OR TRIM(address) = '' OR TRIM(address) = 'Unknown'
+                  OR price IS NULL OR price = 0
+                  OR area IS NULL OR area = 0
+                  OR property_type IS NULL OR TRIM(property_type) = '' OR TRIM(property_type) = 'Unknown'
+                  OR source IS NULL OR TRIM(source) = '' OR TRIM(source) = 'unknown'"""
+        )
+        deleted = deleted_cursor.rowcount
+
         conn.commit()
     finally:
         conn.close()
 
-    return jsonify({"status": "ok", "cleaned": cleaned})
+    return jsonify({"status": "ok", "cleaned": cleaned, "deleted": deleted})
 
 
 def _filter_analytics_rows(rows, args):

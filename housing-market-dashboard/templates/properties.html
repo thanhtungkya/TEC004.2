@@ -95,7 +95,11 @@
           const resp = await fetch('/api/clean-data', { method: 'POST' });
           const data = await resp.json();
           if (data.status === 'ok') {
-            btn.textContent = '✅ Cleaned ' + data.cleaned + ' records!';
+            let msg = '✅ Cleaned ' + data.cleaned + ' records';
+            if (data.deleted !== undefined && data.deleted > 0) {
+              msg += ' (' + data.deleted + ' deleted)';
+            }
+            btn.textContent = msg + '!';
             setTimeout(() => location.reload(), 1200);
           } else {
             btn.textContent = '❌ Error';
