@@ -554,6 +554,7 @@ def api_run_scraper():
 
         # --- Process Retry URLs ---
         import os, json
+        rescraped_collected = []
         retry_file = os.path.join(os.path.dirname(__file__), "retry_urls.json")
         try:
             with open(retry_file, "r", encoding="utf-8") as f:
@@ -618,10 +619,18 @@ def api_run_scraper():
                     PropertyRepository().insert_many(rescraped_collected)
                     scraping_state["records_saved"] += len(rescraped_collected)
                 except Exception as exc:
-                    logger.error("Failed to insert rescraped records: %s", exc)
+                    _log_cb("Retry", "fail", f"Failed to insert rescraped records: {exc}")
 
             with open(retry_file, "w", encoding="utf-8") as f:
                 json.dump(remaining_retry, f, ensure_ascii=False, indent=2)
+
+        # --- Save normal scraping results ---
+        if collected:
+            try:
+                PropertyRepository().insert_many(collected)
+                scraping_state["records_saved"] += len(collected)
+            except Exception as exc:
+                _log_cb("Scraper", "fail", f"Failed to insert collected records: {exc}")
 
         if collected or rescraped_collected:
             scraping_state["message"] = f"Collected {len(collected)} and rescraped {len(rescraped_collected)} listings."
