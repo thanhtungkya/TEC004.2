@@ -67,7 +67,14 @@ If you want to share your local dashboard with others over the internet, you can
 
 1. **Install Cloudflare Tunnel:**
    - Download the executable for your OS from the [Cloudflare Tunnel downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
-   - Alternatively, install via a package manager (e.g., `brew install cloudflared` on macOS, or use `winget install Cloudflare.cloudflared` on Windows).
+   - Alternatively, install via a package manager:
+     - **macOS:** `brew install cloudflared`
+     - **Windows:** `winget install Cloudflare.cloudflared`
+     - **Linux (Debian/Ubuntu):** 
+       ```bash
+       wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+       sudo dpkg -i cloudflared-linux-amd64.deb
+       ```
 
 2. **Run the tunnel** pointing to your local Flask port (default 5001):
    ```bash
