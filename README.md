@@ -61,6 +61,21 @@ The main application code is located in the `housing-market-dashboard/` director
 
 The app will initialize the SQLite database and launch the dashboard.
 
+## 🚇 Expose Localhost with Cloudflare Tunnel
+
+If you want to share your local dashboard with others over the internet, you can use Cloudflare Tunnel (`cloudflared`).
+
+1. **Install Cloudflare Tunnel:**
+   - Download the executable for your OS from the [Cloudflare Tunnel downloads page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
+   - Alternatively, install via a package manager (e.g., `brew install cloudflared` on macOS, or use `winget install Cloudflare.cloudflared` on Windows).
+
+2. **Run the tunnel** pointing to your local Flask port (default 5001):
+   ```bash
+   cloudflared tunnel --url http://127.0.0.1:5001
+   ```
+
+3. The command output will provide a temporary public URL (e.g., `https://random-words.trycloudflare.com`). Share this link to allow others to access your dashboard securely!
+
 ## 🌐 Deployment
 
 This project is configured for easy deployment on [Render](https://render.com). 
