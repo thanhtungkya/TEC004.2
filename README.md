@@ -19,27 +19,31 @@ Python/Flask application for collecting, cleaning, storing, analyzing, and visua
 ## Repository layout
 
 ```text
-TEC004.2/
-├── app.py                         # Root WSGI entrypoint for deployment
-├── requirements.txt               # Python dependencies
-├── render.yaml                    # Render deployment config
-├── DEPLOYMENT.md                  # Full deployment guide
-├── QUICK_DEPLOY.md                # Short deployment guide
-└── housing-market-dashboard/
-    ├── app.py                     # Main Flask app and HTTP routes
-    ├── init_database.py           # Standalone SQLite initialization script
-    ├── data/database/             # Local SQLite database location
-    ├── templates/                 # Flask HTML templates
-    ├── static/css, static/js      # Frontend assets
-    ├── src/
-    │   ├── analytics/             # Market and district analysis
-    │   ├── database/              # SQLite connection, schema, repository
-    │   ├── models/                # Property model classes
-    │   ├── processing/            # Cleaning and transformation pipeline
-    │   ├── scraper/               # Source-specific scrapers and manager
-    │   ├── services/              # OpenAI integration
-    │   └── utils/                 # Config and logging helpers
-    └── tests/                     # Pytest tests
+housing-market-dashboard/
+├─ app.py                         # Flask routes and app orchestration
+├─ requirements.txt               # Python dependencies
+├─ data/database/housing_market.db # SQLite database
+├─ templates/                     # Jinja pages
+│  ├─ dashboard.html
+│  ├─ properties.html
+│  ├─ data_collection.html
+│  ├─ database.html
+│  ├─ analytics.html
+│  └─ settings.html
+├─ static/
+│  ├─ css/style.css               # UI tokens, layout, brand, charts
+│  └─ js/
+│     ├─ collection.js            # Scraper UI polling/actions
+│     └─ theme.js                 # Light/dark theme persistence
+├─ src/
+│  ├─ scraper/                    # SeleniumBase scraping modules
+│  ├─ database/                   # SQLite connection/schema/repository
+│  ├─ processing/                 # cleaning + transform pipeline
+│  ├─ analytics/                  # market and district analytics
+│  ├─ services/                   # OpenAI price prediction
+│  ├─ models/                     # property model classes
+│  └─ utils/                      # config/logger
+└─ tests/                         # pytest coverage
 ```
 
 ## Runtime architecture
