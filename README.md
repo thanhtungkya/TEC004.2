@@ -11,6 +11,11 @@ Python/Flask application for collecting, cleaning, storing, analyzing, and visua
 - Exports property and analytics data as CSV or JSON.
 - Optionally predicts fair market prices through OpenAI when `OPENAI_API_KEY` is configured.
 
+## Documentation
+
+- [Project wiki](housing-market-dashboard/docs/WIKI.md)
+- [Architecture diagrams](housing-market-dashboard/docs/architecture-diagrams.html)
+
 ## Repository layout
 
 ```text
