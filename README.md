@@ -146,7 +146,7 @@ python housing-market-dashboard/init_database.py
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Landing page |
+| `/` | Redirects automatically to `/dashboard` |
 | `/dashboard` | Summary metrics and charts |
 | `/properties` | Searchable property records |
 | `/analytics` | Market and district analysis |

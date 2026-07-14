@@ -49,7 +49,7 @@ def add_response_headers(response):
 
 @app.get("/")
 def index():
-    return render_template("index.html")
+    return redirect(url_for("dashboard"))
 
 
 def _bucket_price(value):
