@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hanoi Housing Market Dashboard · Architecture Diagrams</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+    :root{--bg:#020617;--panel:#0f172a;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--cyan:#22d3ee;--green:#34d399;--violet:#a78bfa;--amber:#fbbf24;--rose:#fb7185;--orange:#fb923c;}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:28px;background-image:linear-gradient(#1e293b55 1px,transparent 1px),linear-gradient(90deg,#1e293b55 1px,transparent 1px);background-size:40px 40px;}
+    header{max-width:1180px;margin:0 auto 24px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end} h1{margin:0;font-size:26px;letter-spacing:-.04em} p{color:var(--muted);line-height:1.6} .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 7px #34d39922;margin-right:10px;animation:pulse 1.8s infinite}@keyframes pulse{50%{box-shadow:0 0 0 12px #34d39900}}
+    .wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}.diagram{background:rgba(15,23,42,.82);border:1px solid #334155;border-radius:18px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.28)} h2{margin:0 0 4px;font-size:17px}.sub{margin:0 0 16px;font-size:12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:rgba(15,23,42,.72);border:1px solid #334155;border-radius:14px;padding:14px}.card h3{font-size:13px;margin:0 0 8px}.card ul{margin:0;padding-left:16px;color:var(--muted);font-size:11px;line-height:1.7}.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--muted)}.legend span{display:inline-flex;align-items:center;gap:6px}.sw{width:12px;height:12px;border-radius:3px;display:inline-block}.front{background:rgba(8,51,68,.8);border:1px solid var(--cyan)}.back{background:rgba(6,78,59,.8);border:1px solid var(--green)}.db{background:rgba(76,29,149,.8);border:1px solid var(--violet)}.ext{background:rgba(30,41,59,.9);border:1px solid var(--muted)}.ai{background:rgba(120,53,15,.7);border:1px solid var(--amber)}
+    svg{width:100%;height:auto;display:block}.label{font:600 12px 'JetBrains Mono';fill:#e2e8f0}.small{font:400 9px 'JetBrains Mono';fill:#94a3b8}.tiny{font:400 8px 'JetBrains Mono';fill:#94a3b8}.box-bg{fill:#0f172a}.frontend{fill:rgba(8,51,68,.4);stroke:#22d3ee;stroke-width:1.5}.backend{fill:rgba(6,78,59,.4);stroke:#34d399;stroke-width:1.5}.database{fill:rgba(76,29,149,.4);stroke:#a78bfa;stroke-width:1.5}.external{fill:rgba(30,41,59,.55);stroke:#94a3b8;stroke-width:1.5}.cloud{fill:rgba(120,53,15,.32);stroke:#fbbf24;stroke-width:1.5}.bus{fill:rgba(251,146,60,.25);stroke:#fb923c;stroke-width:1.5}.arrow{stroke:#64748b;stroke-width:1.6;fill:none;marker-end:url(#arrow)}.arrow2{stroke:#22d3ee;stroke-width:1.6;fill:none;marker-end:url(#arrowC)}.dash{stroke:#fb7185;stroke-width:1.5;fill:none;stroke-dasharray:5 4;marker-end:url(#arrowR)}
+    @media(max-width:800px){body{padding:16px}header{display:block}.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header><div><h1><span class="dot"></span>Hanoi Housing Market Dashboard Architecture</h1><p>System, data, and scraper flow diagrams for the Flask + SQLite real-estate intelligence app.</p></div><p class="sub">Generated documentation artifact · docs/architecture-diagrams.html</p></header>
+  <main class="wrap">
+    <section class="diagram">
+      <h2>1. System Architecture</h2><p class="sub">Browser UI talks to Flask routes/APIs; backend orchestrates scraping, processing, analytics, database, and optional AI prediction.</p>
+      <svg viewBox="0 0 1120 560" role="img" aria-label="System architecture diagram">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#64748b"/></marker><marker id="arrowC" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#22d3ee"/></marker><marker id="arrowR" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#fb7185"/></marker></defs>
+        <path class="arrow" d="M180 112 H290"/><path class="arrow" d="M180 222 H290"/><path class="arrow" d="M180 332 H290"/><path class="arrow" d="M180 442 H290"/>
+        <path class="arrow" d="M490 160 H610"/><path class="arrow" d="M490 270 H610"/><path class="arrow" d="M490 380 H610"/>
+        <path class="arrow" d="M800 160 H910"/><path class="arrow" d="M800 270 H910"/><path class="dash" d="M800 380 H910"/>
+        <rect class="box-bg" x="40" y="70" width="140" height="70" rx="8"/><rect class="frontend" x="40" y="70" width="140" height="70" rx="8"/><text class="label" x="62" y="101">Dashboard</text><text class="small" x="62" y="119">Chart.js + Jinja</text>
+        <rect class="box-bg" x="40" y="180" width="140" height="70" rx="8"/><rect class="frontend" x="40" y="180" width="140" height="70" rx="8"/><text class="label" x="62" y="211">Properties</text><text class="small" x="62" y="229">Search + export</text>
+        <rect class="box-bg" x="40" y="290" width="140" height="70" rx="8"/><rect class="frontend" x="40" y="290" width="140" height="70" rx="8"/><text class="label" x="62" y="321">Data Collection</text><text class="small" x="62" y="339">Start + poll</text>
+        <rect class="box-bg" x="40" y="400" width="140" height="70" rx="8"/><rect class="frontend" x="40" y="400" width="140" height="70" rx="8"/><text class="label" x="62" y="431">Settings</text><text class="small" x="62" y="449">Theme localStorage</text>
+        <rect class="box-bg" x="290" y="95" width="200" height="330" rx="10"/><rect class="backend" x="290" y="95" width="200" height="330" rx="10"/><text class="label" x="330" y="125">Flask app.py</text><text class="small" x="330" y="145">routes + APIs</text><text class="tiny" x="315" y="190">/dashboard</text><text class="tiny" x="315" y="215">/properties</text><text class="tiny" x="315" y="240">/data-collection</text><text class="tiny" x="315" y="265">/database import/export</text><text class="tiny" x="315" y="290">/analytics</text><text class="tiny" x="315" y="315">/api/run-scraper</text><text class="tiny" x="315" y="340">/api/analyze-prices</text>
+        <rect class="box-bg" x="610" y="95" width="190" height="80" rx="8"/><rect class="backend" x="610" y="95" width="190" height="80" rx="8"/><text class="label" x="635" y="128">Processing</text><text class="small" x="635" y="147">clean price/area</text>
+        <rect class="box-bg" x="610" y="230" width="190" height="80" rx="8"/><rect class="backend" x="610" y="230" width="190" height="80" rx="8"/><text class="label" x="635" y="263">Analytics</text><text class="small" x="635" y="282">market + district stats</text>
+        <rect class="box-bg" x="610" y="365" width="190" height="80" rx="8"/><rect class="backend" x="610" y="365" width="190" height="80" rx="8"/><text class="label" x="635" y="398">Scraper Manager</text><text class="small" x="635" y="417">threaded source runs</text>
+        <rect class="box-bg" x="910" y="95" width="160" height="80" rx="8"/><rect class="database" x="910" y="95" width="160" height="80" rx="8"/><text class="label" x="945" y="128">SQLite</text><text class="small" x="935" y="147">properties table</text>
+        <rect class="box-bg" x="910" y="230" width="160" height="80" rx="8"/><rect class="external" x="910" y="230" width="160" height="80" rx="8"/><text class="label" x="938" y="263">Public Sites</text><text class="small" x="930" y="282">11 listing sources</text>
+        <rect class="box-bg" x="910" y="365" width="160" height="80" rx="8"/><rect class="cloud" x="910" y="365" width="160" height="80" rx="8"/><text class="label" x="956" y="398">OpenAI</text><text class="small" x="930" y="417">price prediction</text>
+      </svg>
+      <div class="legend"><span><i class="sw front"></i>Frontend</span><span><i class="sw back"></i>Backend</span><span><i class="sw db"></i>Database</span><span><i class="sw ext"></i>External</span><span><i class="sw ai"></i>AI service</span></div>
+    </section>
+
+    <section class="diagram">
+      <h2>2. Scraping and Storage Flow</h2><p class="sub">Live collection starts in the browser, runs in a background thread, and persists normalized records in SQLite.</p>
+      <svg viewBox="0 0 1120 420" role="img" aria-label="Scraping and storage flow diagram">
+        <defs><marker id="arrowS" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#64748b"/></marker></defs>
+        <path class="arrow" marker-end="url(#arrowS)" d="M165 190 H255"/><path class="arrow" marker-end="url(#arrowS)" d="M405 190 H500"/><path class="arrow" marker-end="url(#arrowS)" d="M650 190 H745"/><path class="arrow" marker-end="url(#arrowS)" d="M895 190 H985"/>
+        <path class="arrow2" marker-end="url(#arrowS)" d="M565 248 C565 320 135 320 135 248"/>
+        <rect class="box-bg" x="45" y="145" width="120" height="90" rx="8"/><rect class="frontend" x="45" y="145" width="120" height="90" rx="8"/><text class="label" x="70" y="180">Browser</text><text class="small" x="62" y="201">collection.js</text><text class="tiny" x="62" y="218">poll status</text>
+        <rect class="box-bg" x="255" y="145" width="150" height="90" rx="8"/><rect class="backend" x="255" y="145" width="150" height="90" rx="8"/><text class="label" x="282" y="180">Flask API</text><text class="small" x="277" y="201">/api/run-scraper</text><text class="tiny" x="282" y="218">threading.Thread</text>
+        <rect class="box-bg" x="500" y="145" width="150" height="90" rx="8"/><rect class="backend" x="500" y="145" width="150" height="90" rx="8"/><text class="label" x="525" y="180">Scrapers</text><text class="small" x="520" y="201">SeleniumBase</text><text class="tiny" x="520" y="218">site modules</text>
+        <rect class="box-bg" x="745" y="145" width="150" height="90" rx="8"/><rect class="backend" x="745" y="145" width="150" height="90" rx="8"/><text class="label" x="772" y="180">Normalize</text><text class="small" x="767" y="201">dedupe + fields</text><text class="tiny" x="767" y="218">no listing date</text>
+        <rect class="box-bg" x="985" y="145" width="110" height="90" rx="8"/><rect class="database" x="985" y="145" width="110" height="90" rx="8"/><text class="label" x="1018" y="180">DB</text><text class="small" x="1002" y="201">SQLite</text><text class="tiny" x="1002" y="218">insert_many</text>
+        <rect class="box-bg" x="250" y="300" width="660" height="54" rx="8"/><rect class="bus" x="250" y="300" width="660" height="54" rx="8"/><text class="label" x="402" y="332">/api/scraper-status returns progress, logs, records_saved</text>
+      </svg>
+    </section>
+
+    <section class="diagram">
+      <h2>3. Data and Analytics Pipeline</h2><p class="sub">Stored listings flow into pandas cleaning, aggregate metrics, charts, exports, and optional AI predictions.</p>
+      <svg viewBox="0 0 1120 430" role="img" aria-label="Data and analytics pipeline diagram">
+        <defs><marker id="arrowP" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><polygon points="0 0,8 3.5,0 7" fill="#64748b"/></marker></defs>
+        <path class="arrow" marker-end="url(#arrowP)" d="M185 205 H280"/><path class="arrow" marker-end="url(#arrowP)" d="M460 205 H555"/><path class="arrow" marker-end="url(#arrowP)" d="M735 150 H840"/><path class="arrow" marker-end="url(#arrowP)" d="M735 260 H840"/><path class="dash" marker-end="url(#arrowP)" d="M460 295 C600 360 755 360 880 315"/>
+        <rect class="box-bg" x="45" y="160" width="140" height="90" rx="8"/><rect class="database" x="45" y="160" width="140" height="90" rx="8"/><text class="label" x="82" y="195">SQLite</text><text class="small" x="72" y="216">raw records</text>
+        <rect class="box-bg" x="280" y="160" width="180" height="90" rx="8"/><rect class="backend" x="280" y="160" width="180" height="90" rx="8"/><text class="label" x="310" y="195">DataCleaner</text><text class="small" x="305" y="216">price, area, duplicates</text>
+        <rect class="box-bg" x="555" y="105" width="180" height="90" rx="8"/><rect class="backend" x="555" y="105" width="180" height="90" rx="8"/><text class="label" x="594" y="140">Analytics</text><text class="small" x="580" y="161">summary + rankings</text>
+        <rect class="box-bg" x="555" y="235" width="180" height="90" rx="8"/><rect class="backend" x="555" y="235" width="180" height="90" rx="8"/><text class="label" x="594" y="270">Exports</text><text class="small" x="582" y="291">CSV + JSON files</text>
+        <rect class="box-bg" x="840" y="105" width="210" height="90" rx="8"/><rect class="frontend" x="840" y="105" width="210" height="90" rx="8"/><text class="label" x="900" y="140">Chart.js UI</text><text class="small" x="875" y="161">Dashboard + Analytics</text>
+        <rect class="box-bg" x="840" y="235" width="210" height="90" rx="8"/><rect class="cloud" x="840" y="235" width="210" height="90" rx="8"/><text class="label" x="905" y="270">OpenAI</text><text class="small" x="880" y="291">fair value prediction</text>
+      </svg>
+    </section>
+
+    <section class="cards">
+      <div class="card"><h3>Primary backend</h3><ul><li>Flask routes live in app.py</li><li>SQLite access via repository</li><li>Scrapers lazy-load Selenium stack</li></ul></div>
+      <div class="card"><h3>Data rule</h3><ul><li>listing_date is legacy-only</li><li>new scraping does not collect it</li><li>exports focus canonical fields</li></ul></div>
+      <div class="card"><h3>Operational notes</h3><ul><li>Run tests with pytest</li><li>Use fixed chart heights</li><li>Theme persists in localStorage</li></ul></div>
+    </section>
+  </main>
+</body>
+</html>
