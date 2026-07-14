@@ -5,9 +5,26 @@ const startBtn = document.getElementById('startScrape');
 const stopBtn = document.getElementById('stopScrape');
 const statusBadge = document.getElementById('statusBadge');
 const logList = document.getElementById('logList');
+const selectedSourceCount = document.getElementById('selectedSourceCount');
+const selectedDistrictLabel = document.getElementById('selectedDistrictLabel');
+const recordsSavedLabel = document.getElementById('recordsSavedLabel');
+
+function selectedSources() {
+  if (!sourceOptions) return [];
+  return Array.from(sourceOptions.querySelectorAll('input:checked')).map((box) => box.value);
+}
+
+function updateRunSummary(recordsSaved) {
+  if (selectedSourceCount) selectedSourceCount.textContent = selectedSources().length;
+  if (selectedDistrictLabel) selectedDistrictLabel.textContent = districtSelect?.value || 'All';
+  if (recordsSavedLabel && recordsSaved !== undefined) recordsSavedLabel.textContent = recordsSaved;
+}
 
 function log(message) {
   if (!logList) return;
+  if (logList.children.length === 1 && logList.firstElementChild?.classList.contains('muted')) {
+    logList.innerHTML = '';
+  }
   const item = document.createElement('li');
   item.textContent = message;
   logList.prepend(item);
@@ -28,6 +45,8 @@ async function checkProgress() {
     const res = await fetch('/api/scraper-status');
     const data = await res.json();
     
+    updateRunSummary(data.records_saved ?? 0);
+
     if (data.progress) {
       const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland', '123nhadatviet'];
       allSources.forEach(src => {
@@ -68,7 +87,8 @@ async function checkProgress() {
 
 if (startBtn) {
   startBtn.addEventListener('click', async () => {
-    const sources = Array.from(sourceOptions.querySelectorAll('input:checked')).map((box) => box.value);
+    const sources = selectedSources();
+    updateRunSummary(0);
     setStatus('Collecting…', 'badge-live');
     if (logList) logList.innerHTML = '';
     lastLogCount = 0;
@@ -144,4 +164,7 @@ async function initScraperState() {
   }
 }
 
+if (sourceOptions) sourceOptions.addEventListener('change', () => updateRunSummary());
+if (districtSelect) districtSelect.addEventListener('change', () => updateRunSummary());
+updateRunSummary(0);
 initScraperState();

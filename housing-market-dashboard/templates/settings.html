@@ -3,15 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings</title>
+    <title>Settings · Hanoi Housing Market Intelligence</title>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar"><div class="brand"><div class="brand-mark">H</div><div><h2>Hanoi Housing Market Intelligence System</h2><p>System configuration</p></div></div><nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/reports">Reports <small>Exports</small></a><a class="nav-link active" href="/settings">Settings <small>Config</small></a></nav></aside>
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h2>Hanoi Housing Market Intelligence</h2></div>
+        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link active" href="/settings">Settings <small>Theme</small></a></nav>
+      </aside>
       <main class="main-panel">
-        <header class="topbar"><div><h1>Settings</h1><p>Configure scraping, report defaults, and notification preferences for your team.</p></div><div class="topbar-actions"><button class="btn btn-primary">Save changes</button></div></header>
-        <section class="page-content"><article class="card"><h3>Preferences</h3><div class="grid-3"><div class="card" style="padding:12px"><h4>Theme</h4><p class="muted">Light mode</p></div><div class="card" style="padding:12px"><h4>Data refresh</h4><p class="muted">Every 6 hours</p></div><div class="card" style="padding:12px"><h4>Notifications</h4><p class="muted">Enabled for status changes</p></div></div></article></section>
+        <header class="topbar">
+          <div><h1>Settings</h1><p>Personalize the interface and keep dashboard controls simple for the analyst workflow.</p></div>
+          <div class="topbar-actions"><span class="chip" data-theme-label>Light mode</span></div>
+        </header>
+        <section class="page-content">
+          <article class="card hero-card">
+            <span class="ambient-orb"></span>
+            <div class="panel-header">
+              <div>
+                <h3>Appearance</h3>
+                <p class="muted">Switch between crisp light mode and cinematic dark mode. Your choice is saved in this browser.</p>
+              </div>
+              <span class="badge badge-info">Persisted locally</span>
+            </div>
+            <div class="theme-setting">
+              <div>
+                <h4 style="margin:0 0 4px;">Interface theme</h4>
+                <p class="muted" style="margin:0;">Current selection: <strong data-theme-label>Light mode</strong></p>
+              </div>
+              <label class="theme-toggle">
+                <span class="small-note">Light</span>
+                <input type="checkbox" data-theme-toggle />
+                <span class="theme-slider" aria-hidden="true"></span>
+                <span class="small-note">Dark</span>
+              </label>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
   </body>

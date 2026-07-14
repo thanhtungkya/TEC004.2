@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Property Listings</title>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand"><div class="brand-mark">H</div><div><h2>Hanoi Housing Market Intelligence System</h2><p>Property intelligence suite</p></div></div>
-        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link active" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/reports">Reports <small>Exports</small></a><a class="nav-link" href="/settings">Settings <small>Config</small></a></nav>
+        <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h2>Hanoi Housing Market Intelligence</h2></div>
+        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link active" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link" href="/settings">Settings <small>Config</small></a></nav>
       </aside>
       <main class="main-panel">
         <header class="topbar">
@@ -20,7 +21,7 @@
           </div>
           <div class="topbar-actions">
             <span class="chip">{{ pagination.total }} live listings</span>
-            <button id="cleanDataBtn" class="btn btn-warning" onclick="cleanData()">🧹 Clean Data</button>
+            <button id="cleanDataBtn" class="btn btn-warning" onclick="cleanData()">Clean Data</button>
             <a class="btn btn-primary" href="{{ url_for('export_properties_csv', **query_args) }}">Export CSV</a>
           </div>
         </header>
@@ -53,14 +54,14 @@
             <div class="panel-header"><h3>Listings table</h3><span class="badge badge-info">Filtered results</span></div>
             <div class="table-wrap">
               <table class="table">
-                <thead><tr><th>Property Title</th><th>Address</th><th>Price</th><th>Area</th><th>Type</th><th>Source</th><th>Listing Date</th><th>Detail</th></tr></thead>
+                <thead><tr><th>Property Title</th><th>Address</th><th>Price</th><th>Area</th><th>Type</th><th>Source</th><th>Detail</th></tr></thead>
                 <tbody>
                   {% if properties %}
                     {% for item in properties %}
-                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.address or item.district or 'Unknown' }}</td><td>{{ item.price_text or item.price or '—' }}</td><td>{{ item.area_text or ((item.area|string) ~ ' m²' if item.area else '—') }}</td><td>{{ item.property_type or 'Land' }}</td><td>{{ item.source or 'unknown' }}</td><td>{{ item.listing_date_display or item.listing_date or '—' }}</td><td>{% if item.url %}<a class="btn btn-secondary" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View</a>{% else %}<button class="btn btn-secondary" disabled title="No detail link saved for this listing">View</button>{% endif %}</td></tr>
+                      <tr><td>{{ item.title or 'Untitled listing' }}</td><td>{{ item.address or item.district or 'Unknown' }}</td><td>{{ item.price_text or item.price or '—' }}</td><td>{{ item.area_text or ((item.area|string) ~ ' m²' if item.area else '—') }}</td><td>{{ item.property_type or 'Land' }}</td><td>{{ item.source or 'unknown' }}</td><td>{% if item.url %}<a class="btn btn-secondary" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View</a>{% else %}<button class="btn btn-secondary" disabled title="No detail link saved for this listing">View</button>{% endif %}</td></tr>
                     {% endfor %}
                   {% else %}
-                    <tr><td colspan="8">No properties found.</td></tr>
+                    <tr><td colspan="7">No properties found.</td></tr>
                   {% endif %}
                 </tbody>
               </table>
@@ -90,23 +91,23 @@
         const btn = document.getElementById('cleanDataBtn');
         const origText = btn.textContent;
         btn.disabled = true;
-        btn.textContent = '⏳ Cleaning...';
+        btn.textContent = 'Cleaning...';
         try {
           const resp = await fetch('/api/clean-data', { method: 'POST' });
           const data = await resp.json();
           if (data.status === 'ok') {
-            let msg = '✅ Cleaned ' + data.cleaned + ' records';
+            let msg = 'Cleaned ' + data.cleaned + ' records';
             if (data.deleted !== undefined && data.deleted > 0) {
               msg += ' (' + data.deleted + ' deleted)';
             }
             btn.textContent = msg + '!';
             setTimeout(() => location.reload(), 1200);
           } else {
-            btn.textContent = '❌ Error';
+            btn.textContent = 'Error';
             setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
           }
         } catch (err) {
-          btn.textContent = '❌ ' + err.message;
+          btn.textContent = 'Error: ' + err.message;
           setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
         }
       }

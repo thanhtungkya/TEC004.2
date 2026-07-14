@@ -121,8 +121,7 @@ def render_listing_cards(url: str, selector: str, card_selector: Optional[str] =
                 url: el.href || null,
                 price_text: price,
                 area_text: area,
-                address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address, .location')?.innerText || '').trim(),
-                listing_date_text: (textNode.querySelector('.date, .time, [class*=date], [class*=time]')?.innerText || '').trim()
+                address: (textNode.querySelector('li.address')?.getAttribute('title') || textNode.querySelector('.rvVitri span, .vip-dis, .address, .caption .address, p.address, .location')?.innerText || '').trim()
             };
         });
         """

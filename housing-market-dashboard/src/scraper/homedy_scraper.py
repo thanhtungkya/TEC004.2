@@ -2,7 +2,6 @@ from src.scraper.selenium_scraper import (
     classify_property_type,
     extract_area,
     extract_district,
-    extract_listing_date,
     extract_price,
     normalise_price_text,
     render_listing_cards,
@@ -39,7 +38,6 @@ def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None):
             continue
         price_text = normalise_price_text(item.get('price_text')) or normalise_price_text(cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
-        listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
 
         try:
             records.append({
@@ -51,7 +49,7 @@ def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None):
             'area': extract_area(area_text or cleaned),
             'area_text': area_text,
             'property_type': classify_property_type(title + ' ' + cleaned, url),
-            'listing_date': listing_date,
+            'listing_date': '',
             'source': 'homedy',
             'url': url,
         })

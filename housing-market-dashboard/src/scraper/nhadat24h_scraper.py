@@ -4,7 +4,6 @@ from src.scraper.selenium_scraper import (
     classify_property_type,
     extract_area,
     extract_district,
-    extract_listing_date,
     extract_price,
     normalise_price_text,
     render_listing_cards,
@@ -46,7 +45,6 @@ def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
         if re.search(r'\b\d{4,}\s*(?:tỷ|ty)\b', price_text, flags=re.I):
             price_text = normalise_price_text(title + ' ' + cleaned)
         area_text = ' '.join((item.get('area_text') or '').split())
-        listing_date = extract_listing_date(item.get('listing_date_text') or cleaned)
 
         try:
             records.append({
@@ -58,7 +56,7 @@ def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
             'area': extract_area(area_text or cleaned),
             'area_text': area_text,
             'property_type': classify_property_type(title + ' ' + cleaned, url),
-            'listing_date': listing_date,
+            'listing_date': '',
             'source': 'nhadat24h',
             'url': url,
         })

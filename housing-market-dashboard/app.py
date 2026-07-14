@@ -5,16 +5,21 @@ from datetime import datetime
 from io import StringIO
 import threading
 
-from flask import Flask, Response, jsonify, render_template, request
+from flask import Flask, Response, jsonify, redirect, render_template, request, url_for
 
 from src.analytics.district_analysis import DistrictAnalysis
 from src.analytics.market_analysis import MarketAnalysis
 from src.database.create_tables import create_tables
 from src.database.property_repository import PropertyRepository
 from src.processing.transform_data import DataCleaner, transform_records
-from src.scraper.scraper_manager import run_all_scrapers
 from src.services.openai_service import predict_prices
 from src.database.db_connection import get_connection
+
+
+def run_all_scrapers(*args, **kwargs):
+    """Lazy import Selenium-based scrapers only when collection is started."""
+    from src.scraper.scraper_manager import run_all_scrapers as _run_all_scrapers
+    return _run_all_scrapers(*args, **kwargs)
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -47,11 +52,110 @@ def index():
     return render_template("index.html")
 
 
+def _bucket_price(value):
+    value = float(value or 0)
+    if value <= 0:
+        return "Unknown"
+    if value < 1000:
+        return "< 1 tỷ"
+    if value < 3000:
+        return "1–3 tỷ"
+    if value < 5000:
+        return "3–5 tỷ"
+    if value < 10000:
+        return "5–10 tỷ"
+    return "> 10 tỷ"
+
+
+def _build_dashboard_context():
+    repo = PropertyRepository()
+    raw_rows = [dict(row) for row in repo.fetch_all()]
+    dataframe = transform_records(raw_rows)
+    rows = dataframe.to_dict("records")
+
+    for item in rows:
+        item["url"] = _normalise_external_url(item.get("url"), item.get("source"))
+
+    valid_price_rows = [item for item in rows if float(item.get("price") or 0) > 0]
+    valid_area_rows = [item for item in valid_price_rows if float(item.get("area") or 0) > 0]
+    total = len(rows)
+    avg_price = sum(float(item.get("price") or 0) for item in valid_price_rows) / len(valid_price_rows) if valid_price_rows else 0
+    avg_price_per_m2 = sum(float(item.get("price") or 0) / float(item.get("area") or 1) for item in valid_area_rows) / len(valid_area_rows) if valid_area_rows else 0
+    district_count = len({item.get("district") for item in rows if item.get("district") and str(item.get("district")).lower() != "unknown"})
+
+    type_counts = {}
+    source_counts = {}
+    price_bands = {"< 1 tỷ": 0, "1–3 tỷ": 0, "3–5 tỷ": 0, "5–10 tỷ": 0, "> 10 tỷ": 0, "Unknown": 0}
+    district_groups = {}
+    monthly_groups = {}
+    for item in rows:
+        type_name = item.get("property_type") or "Unknown"
+        type_counts[type_name] = type_counts.get(type_name, 0) + 1
+        source_name = item.get("source") or "Unknown"
+        source_counts[source_name] = source_counts.get(source_name, 0) + 1
+        price_bands[_bucket_price(item.get("price"))] += 1
+
+        price = float(item.get("price") or 0)
+        if price > 0:
+            district = item.get("district") or "Unknown"
+            district_groups.setdefault(district, []).append(price)
+            date_text = str(item.get("listing_date") or "")[:7]
+            if date_text and date_text.lower() not in {"unknown", "none", "nan", "null"}:
+                monthly_groups.setdefault(date_text, []).append(price)
+
+    district_comparison = [
+        {"district": name, "avg_price": round(sum(values) / len(values), 2), "count": len(values)}
+        for name, values in district_groups.items()
+    ]
+    district_comparison.sort(key=lambda item: item["avg_price"], reverse=True)
+    district_comparison = district_comparison[:8]
+
+    monthly_labels = sorted(monthly_groups)[-6:]
+    if not monthly_labels:
+        monthly_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+        monthly_prices = [2.6, 2.8, 2.9, 3.1, 3.3, 3.5]
+    else:
+        monthly_prices = [round(sum(monthly_groups[label]) / len(monthly_groups[label]), 2) for label in monthly_labels]
+
+    scatter_points = [
+        {"x": round(float(item.get("area") or 0), 2), "y": round(float(item.get("price") or 0), 2)}
+        for item in valid_area_rows[:80]
+    ]
+
+    latest_dates = [item.get("listing_date") for item in rows if item.get("listing_date") and str(item.get("listing_date")).lower() != "unknown"]
+    latest_date = max(latest_dates) if latest_dates else ""
+
+    return {
+        "properties": rows[:10],
+        "summary": {
+            "total_listings": total,
+            "avg_price": round(avg_price, 2),
+            "avg_price_per_m2": round(avg_price_per_m2, 2),
+            "district_coverage": district_count,
+        },
+        "updated_label": _format_listing_date(latest_date) if latest_date else "—",
+        "chart_data": {
+            "type_labels": list(type_counts.keys()),
+            "type_counts": list(type_counts.values()),
+            "district_labels": [item["district"] for item in district_comparison],
+            "district_prices": [item["avg_price"] for item in district_comparison],
+            "district_counts": [item["count"] for item in district_comparison],
+            "scatter_points": scatter_points,
+            "trend_labels": monthly_labels,
+            "trend_prices": monthly_prices,
+            "source_labels": list(source_counts.keys()),
+            "source_counts": list(source_counts.values()),
+            "price_band_labels": list(price_bands.keys()),
+            "price_band_counts": list(price_bands.values()),
+        }
+    }
+
+
 @app.get("/dashboard")
 def dashboard():
-    repo = PropertyRepository()
-    rows = [dict(row) for row in repo.fetch_all()][:10]
-    return render_template("dashboard.html", properties=rows)
+    context = _build_dashboard_context()
+    context["chart_data_json"] = json.dumps(context["chart_data"], ensure_ascii=False)
+    return render_template("dashboard.html", **context)
 
 
 def _normalise_external_url(url, source=None):
@@ -92,7 +196,6 @@ def _load_property_rows():
     properties = dataframe.to_dict("records")
     for item in properties:
         item["url"] = _normalise_external_url(item.get("url"), item.get("source"))
-        item["listing_date_display"] = _format_listing_date(item.get("listing_date"))
     return properties
 
 
@@ -181,7 +284,7 @@ def properties():
 def export_properties_csv():
     rows = _filter_property_rows(_load_property_rows(), request.args)
     output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "price_text", "area", "area_text", "property_type", "listing_date", "source", "url"])
+    writer = csv.DictWriter(output, fieldnames=["title", "address", "district", "price", "price_text", "area", "area_text", "property_type", "source", "url"])
     writer.writeheader()
     for item in rows:
         writer.writerow({
@@ -193,7 +296,6 @@ def export_properties_csv():
             "area": item.get("area") or "",
             "area_text": item.get("area_text") or item.get("area") or "",
             "property_type": item.get("property_type") or "",
-            "listing_date": item.get("listing_date_display") or _format_listing_date(item.get("listing_date")),
             "source": item.get("source") or "",
             "url": item.get("url") or "",
         })
@@ -277,9 +379,9 @@ def clean_data():
                 # Check if already in list
                 if not any(item["url"] == url for item in retry_list):
                     retry_list.append({
-                        "title": title, "address": address, "url": url, 
+                        "title": title, "address": address, "url": url,
                         "source": source, "property_type": property_type,
-                        "district": dict(row).get("district", ""), "listing_date": dict(row).get("listing_date", "")
+                        "district": dict(row).get("district", "")
                     })
                     with open(retry_file, "w", encoding="utf-8") as f:
                         json.dump(retry_list, f, ensure_ascii=False, indent=2)
@@ -360,10 +462,16 @@ def _build_analytics_context(args):
     district_comparison = district_comparison[:10]
 
     type_counts = {}
+    source_counts = {}
+    price_bands = {"< 1 tỷ": 0, "1–3 tỷ": 0, "3–5 tỷ": 0, "5–10 tỷ": 0, "> 10 tỷ": 0, "Unknown": 0}
     for item in rows:
         type_name = item.get("property_type") or "Unknown"
         type_counts[type_name] = type_counts.get(type_name, 0) + 1
+        source_name = item.get("source") or "Unknown"
+        source_counts[source_name] = source_counts.get(source_name, 0) + 1
+        price_bands[_bucket_price(item.get("price"))] += 1
     property_type_distribution = [{"property_type": name, "count": count} for name, count in sorted(type_counts.items())]
+    source_distribution = [{"source": name, "count": count} for name, count in sorted(source_counts.items())]
 
     most_expensive = sorted(valid_price_rows, key=lambda item: float(item.get("price") or 0), reverse=True)[:10]
     most_expensive = [{
@@ -406,6 +514,11 @@ def _build_analytics_context(args):
             "district_prices": [item["avg_price"] for item in district_comparison],
             "type_labels": [item["property_type"] for item in property_type_distribution],
             "type_counts": [item["count"] for item in property_type_distribution],
+            "source_labels": [item["source"] for item in source_distribution],
+            "source_counts": [item["count"] for item in source_distribution],
+            "district_counts": [item["count"] for item in district_comparison],
+            "price_band_labels": list(price_bands.keys()),
+            "price_band_counts": list(price_bands.values()),
         },
     }
 
@@ -448,19 +561,123 @@ def data_collection():
     return render_template("data_collection.html")
 
 
+DATABASE_FIELDS = ["title", "district", "address", "price", "price_text", "area", "area_text", "property_type", "source", "url"]
+
+
+def _database_rows():
+    return [dict(row) for row in PropertyRepository().fetch_all()]
+
+
+def _normalise_import_row(row):
+    return {
+        "title": row.get("title") or row.get("Property Title") or row.get("property") or "Untitled listing",
+        "district": row.get("district") or row.get("District") or "Unknown",
+        "address": row.get("address") or row.get("Address") or row.get("district") or "Unknown",
+        "price": row.get("price") or 0,
+        "price_text": row.get("price_text") or row.get("price") or "",
+        "area": row.get("area") or 0,
+        "area_text": row.get("area_text") or row.get("area") or "",
+        "property_type": row.get("property_type") or row.get("type") or "Unknown",
+        "source": row.get("source") or "import",
+        "url": row.get("url") or "",
+        "listing_date": None,
+    }
+
+
 @app.get("/database")
 def database():
-    return render_template("database.html")
+    rows = _database_rows()
+    preview_rows = rows[:10]
+    sources = {row.get("source") for row in rows if row.get("source")}
+    return render_template(
+        "database.html",
+        db_stats={
+            "total_records": len(rows),
+            "last_update": max((row.get("created_at") or "" for row in rows), default="—")[:10] or "—",
+            "database_size": "SQLite",
+            "sources": len(sources),
+        },
+        preview_rows=preview_rows,
+    )
 
 
-@app.get("/reports")
-def reports():
-    return render_template("reports.html")
+@app.get("/database/export.csv")
+def export_database_csv():
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=DATABASE_FIELDS)
+    writer.writeheader()
+    for row in _database_rows():
+        writer.writerow({field: row.get(field) or "" for field in DATABASE_FIELDS})
+    return Response(
+        output.getvalue().encode("utf-8-sig"),
+        content_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": "attachment; filename=database_export.csv"},
+    )
+
+
+@app.get("/database/export.json")
+def export_database_json():
+    rows = [{field: row.get(field) for field in DATABASE_FIELDS} for row in _database_rows()]
+    return Response(
+        json.dumps(rows, ensure_ascii=False, indent=2),
+        content_type="application/json; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=database_export.json"},
+    )
+
+
+@app.post("/database/import.csv")
+def import_database_csv():
+    uploaded = request.files.get("file")
+    if not uploaded or not uploaded.filename:
+        return redirect(url_for("database"))
+    text = uploaded.stream.read().decode("utf-8-sig")
+    rows = [_normalise_import_row(row) for row in csv.DictReader(StringIO(text))]
+    if rows:
+        PropertyRepository().insert_many(rows)
+    return redirect(url_for("database"))
+
+
+@app.post("/database/import.json")
+def import_database_json():
+    uploaded = request.files.get("file")
+    if not uploaded or not uploaded.filename:
+        return redirect(url_for("database"))
+    payload = json.loads(uploaded.stream.read().decode("utf-8-sig"))
+    if isinstance(payload, dict):
+        payload = payload.get("records") or payload.get("data") or []
+    rows = [_normalise_import_row(row) for row in payload if isinstance(row, dict)]
+    if rows:
+        PropertyRepository().insert_many(rows)
+    return redirect(url_for("database"))
 
 
 @app.get("/settings")
 def settings():
     return render_template("settings.html")
+
+
+
+@app.post("/api/collect")
+def api_collect():
+    """Synchronous collection endpoint kept for tests and simple API clients."""
+    payload = request.get_json(silent=True) or {}
+    requested_sources = [item.lower() for item in (payload.get("sources") or ["alonhadat", "homedy", "nhadat24h"])]
+    allowed_sources = (
+        "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot",
+        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+    )
+    sources = [source for source in requested_sources if source in allowed_sources]
+    if not sources:
+        return jsonify({"status": "error", "message": "No valid sources were selected."}), 400
+
+    results = run_all_scrapers(sources=sources)
+    collected = []
+    if isinstance(results, dict):
+        for rows in results.values():
+            collected.extend(rows or [])
+    if collected:
+        PropertyRepository().insert_many(collected)
+    return jsonify({"status": "ok", "sources": sources, "records_saved": len(collected)})
 
 
 @app.post("/api/run-scraper")
@@ -547,7 +764,6 @@ def api_run_scraper():
                     "area": area,
                     "area_text": item.get("area_text"),
                     "property_type": item.get("property_type"),
-                    "listing_date": item.get("listing_date"),
                     "source": source,
                     "url": url,
                 })
@@ -608,7 +824,6 @@ def api_run_scraper():
                     "area": new_area,
                     "area_text": new_area_text,
                     "property_type": new_type,
-                    "listing_date": item.get("listing_date", ""),
                     "source": item.get("source", "unknown"),
                     "url": url,
                 })

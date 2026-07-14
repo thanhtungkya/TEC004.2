@@ -15,7 +15,7 @@ class PropertyRepository:
                     row.get('area'),
                     row.get('area_text'),
                     row.get('property_type'),
-                    row.get('listing_date'),
+                    None,
                     row.get('source'),
                     row.get('url'),
                     row.get('ai_predicted_price'),
@@ -36,8 +36,8 @@ class PropertyRepository:
                 title, district, address, price, price_text, area, area_text, source, url = values
                 values = (title, district, address, price, price_text, area, area_text, None, None, source, url, None)
             elif len(values) == 11:
-                title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url = values
-                values = (title, district, address, price, price_text, area, area_text, property_type, listing_date, source, url, None)
+                title, district, address, price, price_text, area, area_text, property_type, _listing_date, source, url = values
+                values = (title, district, address, price, price_text, area, area_text, property_type, None, source, url, None)
             normalised_rows.append(values)
 
         conn = get_connection()
