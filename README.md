@@ -131,7 +131,6 @@ properties (
   listing_date TEXT,
   source TEXT,
   url TEXT,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   ai_predicted_price REAL
 )
 ```
