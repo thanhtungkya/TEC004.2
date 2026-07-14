@@ -147,7 +147,6 @@ sosanhnha_scraper.py
 bds123_scraper.py
 nhaongay_scraper.py
 meeyland_scraper.py
-nhadatviet123_scraper.py
 ```
 
 ## 7. Processing Pipeline

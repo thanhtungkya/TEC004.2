@@ -48,7 +48,7 @@ async function checkProgress() {
     updateRunSummary(data.records_saved ?? 0);
 
     if (data.progress) {
-      const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland', '123nhadatviet'];
+      const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland'];
       allSources.forEach(src => {
         if (document.getElementById('progress' + src) && data.progress[src.toLowerCase()] !== undefined) {
           document.getElementById('progress' + src).style.width = Math.min(100, (data.progress[src.toLowerCase()]/200)*100) + '%';
@@ -94,7 +94,7 @@ if (startBtn) {
     lastLogCount = 0;
     log(`Starting collection for ${sources.join(', ')} with keyword "${keywordInput.value}".`);
     
-    const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland', '123nhadatviet'];
+    const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland'];
     allSources.forEach(src => {
       if (document.getElementById('progress' + src)) {
         document.getElementById('progress' + src).style.width = '0%';

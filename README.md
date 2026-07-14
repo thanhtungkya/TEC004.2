@@ -196,7 +196,6 @@ Configured in `housing-market-dashboard/src/scraper/scraper_manager.py`:
 - `bds123`
 - `nhaongay`
 - `meeyland`
-- `123nhadatviet`
 
 ## Data-cleaning pipeline
 

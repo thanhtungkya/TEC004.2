@@ -664,7 +664,7 @@ def api_collect():
     requested_sources = [item.lower() for item in (payload.get("sources") or ["alonhadat", "homedy", "nhadat24h"])]
     allowed_sources = (
         "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot",
-        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+        "sosanhnha", "bds123", "nhaongay", "meeyland"
     )
     sources = [source for source in requested_sources if source in allowed_sources]
     if not sources:
@@ -691,13 +691,13 @@ def api_run_scraper():
     selected = request.get_json(silent=True) or {}
     requested_sources = [item.lower() for item in (selected.get("sources") or [
         "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot", 
-        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+        "sosanhnha", "bds123", "nhaongay", "meeyland"
     ])]
     keyword = (selected.get("keyword") or "").strip()
     district = (selected.get("district") or "").strip()
     allowed_sources = (
         "alonhadat", "homedy", "nhadat24h", "batdongsan", "mogi", "nhatot", 
-        "sosanhnha", "bds123", "nhaongay", "meeyland", "123nhadatviet"
+        "sosanhnha", "bds123", "nhaongay", "meeyland"
     )
     sources = [source for source in requested_sources if source in allowed_sources]
 

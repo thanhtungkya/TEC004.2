@@ -13,7 +13,6 @@ urls = {
     'bds123': 'https://bds123.vn/ban-nha-ha-noi.html',
     'meeyland': 'https://meeyland.com/mua-ban-nha-dat-ha-noi-b42',
     'nhadat24h': 'https://nhadat24h.net/nha-dat-ban-ha-noi',
-    '123nhadatviet': 'https://123nhadatviet.com/rao-vat/can-ban/nha-dat/t1/ha-noi.html',
     'nhaongay': 'https://nhaongay.vn/ban-nha-dat-ha-noi',
     'nhatot': 'https://www.nhatot.com/mua-ban-bat-dong-san-ha-noi',
     'sosanhnha': 'https://sosanhnha.vn/nha-dat-ban-ha-noi-xc1-ci38'

@@ -10,7 +10,7 @@ from src.scraper.sosanhnha_scraper import scrape_sosanhnha
 from src.scraper.bds123_scraper import scrape_bds123
 from src.scraper.nhaongay_scraper import scrape_nhaongay
 from src.scraper.meeyland_scraper import scrape_meeyland
-from src.scraper.nhadatviet123_scraper import scrape_nhadatviet123
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,6 @@ def run_all_scrapers(sources=None, progress_cb=None, log_cb=None, abort_event=No
         'bds123': scrape_bds123,
         'nhaongay': scrape_nhaongay,
         'meeyland': scrape_meeyland,
-        '123nhadatviet': scrape_nhadatviet123,
     }
 
     selected = [item.lower() for item in (sources or list(scrapers.keys()))]
