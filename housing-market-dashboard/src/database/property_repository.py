@@ -59,3 +59,10 @@ class PropertyRepository:
             return conn.execute("SELECT * FROM properties ORDER BY id DESC").fetchall()
         finally:
             conn.close()
+
+    def fetch_urls(self):
+        conn = get_connection()
+        try:
+            return [row[0] for row in conn.execute("SELECT url FROM properties WHERE url IS NOT NULL AND TRIM(url) != ''").fetchall()]
+        finally:
+            conn.close()

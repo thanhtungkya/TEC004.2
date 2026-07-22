@@ -51,9 +51,9 @@ async function checkProgress() {
       const allSources = ['Alonhadat', 'Homedy', 'Nhadat24h', 'batdongsan', 'mogi', 'nhatot', 'sosanhnha', 'bds123', 'nhaongay', 'meeyland'];
       allSources.forEach(src => {
         if (document.getElementById('progress' + src) && data.progress[src.toLowerCase()] !== undefined) {
-          document.getElementById('progress' + src).style.width = Math.min(100, (data.progress[src.toLowerCase()]/200)*100) + '%';
+          document.getElementById('progress' + src).style.width = Math.min(100, (data.progress[src.toLowerCase()]/1000)*100) + '%';
           if (document.getElementById('count' + src)) {
-            document.getElementById('count' + src).textContent = data.progress[src.toLowerCase()] + ' / 200';
+            document.getElementById('count' + src).textContent = data.progress[src.toLowerCase()] + ' / 1000';
           }
         }
       });
@@ -99,7 +99,7 @@ if (startBtn) {
       if (document.getElementById('progress' + src)) {
         document.getElementById('progress' + src).style.width = '0%';
         if (document.getElementById('count' + src)) {
-          document.getElementById('count' + src).textContent = '0 / 200';
+          document.getElementById('count' + src).textContent = '0 / 1000';
         }
       }
     });

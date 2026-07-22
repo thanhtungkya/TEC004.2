@@ -2,16 +2,27 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 NHATOT_URL = 'https://www.nhatot.com/mua-ban-bat-dong-san-ha-noi'
+NHATOT_URLS = [
+    'https://www.nhatot.com/mua-ban-bat-dong-san-ha-noi',
+    'https://www.nhatot.com/mua-ban-can-ho-chung-cu-ha-noi',
+    'https://www.nhatot.com/mua-ban-dat-ha-noi',
+    'https://www.nhatot.com/mua-ban-nha-dat-ha-noi',
+]
 
-def scrape_nhatot(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_nhatot(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        NHATOT_URL,
-        'li a[href*=".htm"]'
+    cards = collect_cards_from_sources(
+        'nhatot',
+        NHATOT_URLS,
+        'li a[href*=".htm"]',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -42,4 +53,4 @@ def scrape_nhatot(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('nhatot', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]

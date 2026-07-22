@@ -2,16 +2,27 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 BATDONGSAN_URL = 'https://batdongsan.com.vn/nha-dat-ban-ha-noi'
+BATDONGSAN_URLS = [
+    'https://batdongsan.com.vn/nha-dat-ban-ha-noi',
+    'https://batdongsan.com.vn/ban-can-ho-chung-cu-ha-noi',
+    'https://batdongsan.com.vn/ban-nha-rieng-ha-noi',
+    'https://batdongsan.com.vn/ban-dat-ha-noi',
+]
 
-def scrape_batdongsan(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_batdongsan(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        BATDONGSAN_URL,
-        'a.js__product-link-for-product-id', '.js__card'
+    cards = collect_cards_from_sources(
+        'batdongsan',
+        BATDONGSAN_URLS,
+        'a.js__product-link-for-product-id', '.js__card',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -42,4 +53,4 @@ def scrape_batdongsan(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('batdongsan', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]

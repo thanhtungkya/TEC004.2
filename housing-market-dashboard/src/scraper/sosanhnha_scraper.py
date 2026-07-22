@@ -2,16 +2,27 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 SOSANHNHA_URL = 'https://sosanhnha.vn/nha-dat-ban-ha-noi-xc1-ci38'
+SOSANHNHA_URLS = [
+    'https://sosanhnha.vn/nha-dat-ban-ha-noi-xc1-ci38',
+    'https://sosanhnha.vn/can-ho-chung-cu-ban-ha-noi-xc1-ci38',
+    'https://sosanhnha.vn/dat-ban-ha-noi-xc1-ci38',
+    'https://sosanhnha.vn/nha-rieng-ban-ha-noi-xc1-ci38',
+]
 
-def scrape_sosanhnha(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_sosanhnha(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        SOSANHNHA_URL,
-        'a.js__card-title'
+    cards = collect_cards_from_sources(
+        'sosanhnha',
+        SOSANHNHA_URLS,
+        'a.js__card-title',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -42,4 +53,4 @@ def scrape_sosanhnha(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('sosanhnha', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]

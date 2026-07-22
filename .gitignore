@@ -1,5 +1,7 @@
 .venv/
 __pycache__/
+GEMINI.md
+.agent/
 *.pyc
 .brv/
 .env

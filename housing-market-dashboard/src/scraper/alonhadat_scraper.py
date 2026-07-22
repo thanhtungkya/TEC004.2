@@ -4,18 +4,30 @@ from src.scraper.selenium_scraper import (
     extract_district,
     extract_price,
     normalise_price_text,
-    render_listing_cards,
+    collect_cards_from_sources,
+    SCRAPE_LINK_LIMIT,
     HANOI_DISTRICTS,
 )
 
 ALONHADAT_URL = 'https://alonhadat.com.vn/can-ban-nha-dat/ha-noi'
+ALONHADAT_URLS = [
+    'https://alonhadat.com.vn/can-ban-nha-dat/ha-noi',
+    'https://alonhadat.com.vn/can-ban-can-ho-chung-cu/ha-noi',
+    'https://alonhadat.com.vn/can-ban-nha-rieng/ha-noi',
+    'https://alonhadat.com.vn/can-ban-dat/ha-noi',
+]
 
 
-def scrape_alonhadat(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_alonhadat(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        ALONHADAT_URL,
-        'a.link.vip'
+    cards = collect_cards_from_sources(
+        'alonhadat',
+        ALONHADAT_URLS,
+        'a.link.vip',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
 
     seen_urls = set()
@@ -63,4 +75,4 @@ def scrape_alonhadat(progress_cb=None, log_cb=None, abort_event=None):
             if log_cb:
                 log_cb('alonhadat', 'Fail', f"{url} - {exc}")
 
-    return records[:200]
+    return records[:link_limit]

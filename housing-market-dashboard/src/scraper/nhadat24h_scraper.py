@@ -6,18 +6,30 @@ from src.scraper.selenium_scraper import (
     extract_district,
     extract_price,
     normalise_price_text,
-    render_listing_cards,
+    collect_cards_from_sources,
+    SCRAPE_LINK_LIMIT,
     HANOI_DISTRICTS,
 )
 
 NHADAT24H_URL = 'https://nhadat24h.net/nha-dat-ban-ha-noi'
+NHADAT24H_URLS = [
+    'https://nhadat24h.net/nha-dat-ban-ha-noi',
+    'https://nhadat24h.net/ban-can-ho-chung-cu-ha-noi',
+    'https://nhadat24h.net/ban-nha-rieng-ha-noi',
+    'https://nhadat24h.net/ban-dat-ha-noi',
+]
 
 
-def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        NHADAT24H_URL,
-        '.pn1 a', '.pn1'
+    cards = collect_cards_from_sources(
+        'nhadat24h',
+        NHADAT24H_URLS,
+        '.pn1 a', '.pn1',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
 
     seen_urls = set()
@@ -68,4 +80,4 @@ def scrape_nhadat24h(progress_cb=None, log_cb=None, abort_event=None):
             if log_cb:
                 log_cb('nhadat24h', 'Fail', f"{url} - {exc}")
 
-    return records[:200]
+    return records[:link_limit]

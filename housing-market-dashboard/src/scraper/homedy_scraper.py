@@ -4,18 +4,30 @@ from src.scraper.selenium_scraper import (
     extract_district,
     extract_price,
     normalise_price_text,
-    render_listing_cards,
+    collect_cards_from_sources,
+    SCRAPE_LINK_LIMIT,
     HANOI_DISTRICTS,
 )
 
 HOMEDY_URL = 'https://homedy.com/ban-nha-rieng-ha-noi'
+HOMEDY_URLS = [
+    'https://homedy.com/ban-nha-rieng-ha-noi',
+    'https://homedy.com/ban-can-ho-chung-cu-ha-noi',
+    'https://homedy.com/ban-dat-ha-noi',
+    'https://homedy.com/ban-biet-thu-lien-ke-ha-noi',
+]
 
 
-def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        HOMEDY_URL,
-        '.product-item-top a[href]', '.product-item'
+    cards = collect_cards_from_sources(
+        'homedy',
+        HOMEDY_URLS,
+        '.product-item-top a[href]', '.product-item',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
 
     seen_urls = set()
@@ -61,4 +73,4 @@ def scrape_homedy(progress_cb=None, log_cb=None, abort_event=None):
             if log_cb:
                 log_cb('homedy', 'Fail', f"{url} - {exc}")
 
-    return records[:200]
+    return records[:link_limit]

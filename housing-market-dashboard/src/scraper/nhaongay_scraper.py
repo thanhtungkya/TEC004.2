@@ -2,16 +2,27 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 NHAONGAY_URL = 'https://nhaongay.vn/ban-nha-dat-ha-noi'
+NHAONGAY_URLS = [
+    'https://nhaongay.vn/ban-nha-dat-ha-noi',
+    'https://nhaongay.vn/ban-can-ho-chung-cu-ha-noi',
+    'https://nhaongay.vn/ban-dat-ha-noi',
+    'https://nhaongay.vn/ban-nha-rieng-ha-noi',
+]
 
-def scrape_nhaongay(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_nhaongay(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        NHAONGAY_URL,
-        '.card-title a', '.card'
+    cards = collect_cards_from_sources(
+        'nhaongay',
+        NHAONGAY_URLS,
+        '.card-title a', '.card',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -42,4 +53,4 @@ def scrape_nhaongay(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('nhaongay', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]

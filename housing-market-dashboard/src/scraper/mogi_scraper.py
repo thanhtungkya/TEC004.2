@@ -2,16 +2,27 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 MOGI_URL = 'https://mogi.vn/ha-noi/mua-nha-dat'
+MOGI_URLS = [
+    'https://mogi.vn/ha-noi/mua-nha-dat',
+    'https://mogi.vn/ha-noi/mua-can-ho-chung-cu',
+    'https://mogi.vn/ha-noi/mua-dat',
+    'https://mogi.vn/ha-noi/mua-nha-rieng',
+]
 
-def scrape_mogi(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_mogi(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        MOGI_URL,
-        'a.link-overlay', '.property-item'
+    cards = collect_cards_from_sources(
+        'mogi',
+        MOGI_URLS,
+        'a.link-overlay', '.property-item',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -42,4 +53,4 @@ def scrape_mogi(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('mogi', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]

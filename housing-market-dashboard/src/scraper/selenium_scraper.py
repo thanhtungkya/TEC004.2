@@ -18,6 +18,43 @@ HANOI_DISTRICTS = {
     'Chương Mỹ', 'Thanh Oai', 'Thường Tín', 'Phú Xuyên', 'Ứng Hòa', 'Mỹ Đức'
 }
 
+SCRAPE_LINK_LIMIT = 1000
+
+
+def normalize_listing_url(url: str) -> str:
+    value = str(url or '').strip()
+    if not value:
+        return ''
+    value = value.split('#', 1)[0].split('?', 1)[0]
+    return value.rstrip('/')
+
+
+def collect_cards_from_sources(source_name: str, source_urls, selector: str, card_selector: Optional[str] = None,
+                               existing_urls=None, limit: int = SCRAPE_LINK_LIMIT, log_cb=None, abort_event=None):
+    """Collect listing cards across category pages, skipping URLs already stored or seen this run."""
+    existing = {normalize_listing_url(url) for url in (existing_urls or set()) if url}
+    seen = set()
+    cards = []
+    for source_url in source_urls:
+        if abort_event and abort_event.is_set():
+            break
+        page_cards = render_listing_cards(source_url, selector, card_selector)
+        added = 0
+        for item in page_cards:
+            url_key = normalize_listing_url(item.get('url'))
+            if not url_key or url_key in existing or url_key in seen:
+                continue
+            seen.add(url_key)
+            cards.append(item)
+            added += 1
+            if len(cards) >= limit:
+                if log_cb:
+                    log_cb(source_name, 'Info', f'Reached {limit} new links limit.')
+                return cards
+        if log_cb:
+            log_cb(source_name, 'Info', f'{source_url}: {added} new links, {len(page_cards) - added} skipped.')
+    return cards
+
 
 def _get_driver():
     """Return a patched SeleniumBase driver."""

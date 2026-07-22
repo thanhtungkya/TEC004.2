@@ -934,5 +934,461 @@
     "property_type": "Land",
     "district": "Ba Đình",
     "listing_date": ""
+  },
+  {
+    "title": "💎SIÊU PHẨM QUẬN HAI BÀ TRƯNG - THIẾT KẾ ĐẲNG CẤP - NỘI THẤT TIỀN TỶ - 62m - 4 TẦNG - 19,x",
+    "address": "Hai Bà Trưng",
+    "url": "https://alonhadat.com.vn/-sieu-pham-quan-hai-ba-trung-thiet-ke-dang-cap-noi-that-tien-ty-62m-4-tang-19-x-18899953.html",
+    "source": "alonhadat",
+    "property_type": "Land",
+    "district": "Hai Bà Trưng"
+  },
+  {
+    "title": "Cần bán gấp chung cư Penstudio 699 Lạc Long Quân-Tây Hồ-wiev đẹp-Cạnh LOTTE-Full nội thất-",
+    "address": "Tây Hồ",
+    "url": "https://alonhadat.com.vn/can-ban-gap-chung-cu-penstudio-699-lac-long-quan-tay-ho-wiev-dep-canh-lotte-full-noi-that--18889897.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Tây Hồ"
+  },
+  {
+    "title": "CHỦ BÁN CĂN HỘ BA ĐÌNH – LÔ GÓC – 3PN 2VS – BAN CÔNG 12M² CỰC ĐẸP",
+    "address": "Ba Đình",
+    "url": "https://alonhadat.com.vn/chinh-chu-ban-can-ho-ba-dinh-lo-goc-3pn-2vs-ban-cong-12m-cuc-dep-18792818.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Ba Đình"
+  },
+  {
+    "title": "CHÍNH CHỦ BÁN CĂN HỘ CAO CẤP KHU ĐÔ THỊ VIỆT HƯNG – LONG BIÊN, HÀ NỘI",
+    "address": "Long Biên",
+    "url": "https://alonhadat.com.vn/chinh-chu-ban-can-ho-cao-cap-khu-do-thi-viet-hung-long-bien-ha-noi-18746941.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Long Biên"
+  },
+  {
+    "title": "❇️BÁN CĂN CHUNG CƯ FLC LANDMARK LÊ ĐỨC THỌ, NAM TỪ LIÊM 124 M2, 3 PHÒNG NGỦ, 2 VS GIÁ RẺ",
+    "address": "Nam Từ Liêm",
+    "url": "https://alonhadat.com.vn/-ban-can-chung-cu-flc-landmark-le-duc-tho-nam-tu-liem-124-m2-3-phong-ngu-2-vs-gia-re-18138813.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Nam Từ Liêm"
+  },
+  {
+    "title": "CĂN CHUNG CƯ HÀ ĐÔNG ĐH PHEENIKAA, GA YÊN NGHĨA NỘI THẤT MỚI ĐẸP Ở NGAY 3PN 2VS BAN CÔNG",
+    "address": "Hà Đông",
+    "url": "https://alonhadat.com.vn/can-chung-cu-ha-dong-dh-pheenikaa-ga-yen-nghia-noi-that-moi-dep-o-ngay-3pn-2vs-ban-cong-18147726.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Hà Đông"
+  },
+  {
+    "title": "Hà Đông KĐT Văn Quán Chung cư Cao Cấp New Skyline Căn Góc - 140m2 4PN 2VS Slot ô tô",
+    "address": "Hà Đông",
+    "url": "https://alonhadat.com.vn/ha-dong-kdt-van-quan-chung-cu-cao-cap-new-skyline-can-goc-140m2-4pn-2vs-slot-o-to-18898309.html",
+    "source": "alonhadat",
+    "property_type": "Apartment",
+    "district": "Hà Đông"
+  },
+  {
+    "title": "3",
+    "address": "Đường Nguyễn Khoái, Phường Thanh Trì, Quận Hoàng Mai, Hà Nội",
+    "url": "https://homedy.com/ban-dat-quan-hoang-mai-ha-noi/10-000m2-mat-duong-nguyen-khoai-gia-12tr-m2-es3163437",
+    "source": "homedy",
+    "property_type": "Land",
+    "district": "Thanh Trì"
+  },
+  {
+    "title": "0",
+    "address": "Xã An Thượng, Huyện Hoài Đức, Hà Nội",
+    "url": "https://homedy.com/ban-dat-huyen-hoai-duc-ha-noi/tho-cu-lo-goc-2-mat-thoang-o-to-do-cua-tai-ngu-cau-an-thuong-gia-chi-105tr-m2-es3213672",
+    "source": "homedy",
+    "property_type": "Land",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "5",
+    "address": "Xã Hòa Thạch, Huyện Quốc Oai, Hà Nội",
+    "url": "https://homedy.com/ban-dat-huyen-quoc-oai-ha-noi/f0-phu-cat-gia-cham-day-dau-tu-lo-dep-100m2-chi-nhinh-2-ty-khong-mua-gio-doi-khi-nao-es3203862",
+    "source": "homedy",
+    "property_type": "Land",
+    "district": "Quốc Oai"
+  },
+  {
+    "title": "4",
+    "address": "Xã Hòa Thạch, Huyện Quốc Oai, Hà Nội",
+    "url": "https://homedy.com/ban-dat-huyen-quoc-oai-ha-noi/lo-goc-phu-cat-100m2-gia-nhinh-2-ty-hiem-hang-dau-tu-o-suong-sinh-loi-tot-es3198445",
+    "source": "homedy",
+    "property_type": "Land",
+    "district": "Quốc Oai"
+  },
+  {
+    "title": "Độc quyền bán CCMN Nguyễn Ngọc Nại 7 tầng 18P full đồ dòng tiền nét 1,2 tỷ/năm. LH 0988 702 *** Thỏa thuận ·82 m² Q. Đốn",
+    "address": "Đống Đa",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-duong-nguyen-ngoc-nai-phuong-phuong-lien-3/oc-quyen-ban-ccmn-7-tang-18p-full-o-dong-tien-net-1-2-ty-nam-lh-pr45982345",
+    "source": "batdongsan",
+    "property_type": "Apartment",
+    "district": "Đống Đa"
+  },
+  {
+    "title": "4 Bán nhà phố Hồng Tiến, sổ đỏ 40m² * m tiền 4.8m vuông đẹp, ngõ ngắn chỉ 20m ra mặt phố, hơn 9 tỷ Giá thỏa thuận · 40 m",
+    "address": "Long Biên",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-pho-hong-tien-phuong-bo-de-9/ban-so-o-40m2-m-4-8m-vuong-ep-ngo-ngan-chi-20m-ra-mat-hon-9-ty-pr46013727",
+    "source": "batdongsan",
+    "property_type": "Land",
+    "district": "Long Biên"
+  },
+  {
+    "title": "22 Siêu phẩm dòng tiền trung tâm Hà Nội tòa căn hộ 8 tầng vận hành Airbnb full khách nước ngoài Giá thỏa thuận · 90 m² ·",
+    "address": "Đống Đa",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-pho-vu-ngoc-phan-phuong-lang-ha-3/chinh-chu-ban-90m2-mat-tien-5m-8-tang-dong-tien-gan-200-trieu-thang-pr43202435",
+    "source": "batdongsan",
+    "property_type": "Apartment",
+    "district": "Đống Đa"
+  },
+  {
+    "title": "24 Chính chủ bán nhà 9 tầng ngõ ô tô tránh Thái Hà 70m2 với 8 tầng nổi và 1 tầng hầm 2 mặt ngõ ô tô Giá thỏa thuận · 70",
+    "address": "Đống Đa",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-pho-thai-ha-phuong-lang-ha-3/chinh-chu-ban-9-tang-ngo-o-to-tranh-70m2-x-9-tang-gia-38-ty-pr43022669",
+    "source": "batdongsan",
+    "property_type": "Land",
+    "district": "Đống Đa"
+  },
+  {
+    "title": "7 Siêu phẩm dòng tiền khu vực Hồ Tùng Mậu doanh thu gần 5 tỷ đồng/năm đón đầu quy hoạch tăng giá Giá thỏa thuận · 135 m²",
+    "address": "Bắc Từ Liêm",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-duong-ho-tung-mau-phuong-phu-dien-718/sieu-pham-dong-tien-khu-vuc-doanh-thu-gan-5-ty-ong-nam-on-au-quy-hoach-tang-gia-pr45993613",
+    "source": "batdongsan",
+    "property_type": "Apartment",
+    "district": "Bắc Từ Liêm"
+  },
+  {
+    "title": "4 Chính chủ bán tòa căn hộ dịch vụ dòng tiền đường ô tô tiềm năng tăng giá rất lớn Giá thỏa thuận · 95 m² · 25 · 25 Q. H",
+    "address": "Hoàng Mai",
+    "url": "https://batdongsan.com.vn/ban-nha-rieng-duong-tam-trinh-phuong-yen-so-8/chinh-chu-ban-95m2-7-tang-25-phong-o-to-gia-27-9-ty-co-tl-pr44638382",
+    "source": "batdongsan",
+    "property_type": "Apartment",
+    "district": "Hoàng Mai"
+  },
+  {
+    "title": "Lô đất siêu hiếm còn sót lại, đón đầu QH, DT 81m2, giá chỉ hơn 1x tỷ, sổ đỏ chính chủ Thỏa thuận ·81 m² H. Chương Mỹ",
+    "address": "Chương Mỹ",
+    "url": "https://batdongsan.com.vn/ban-dat-thi-tran-xuan-mai-1/lo-at-sieu-hiem-con-sot-lai-on-au-qh-dt-81m2-gia-chi-hon-1x-ty-so-o-chinh-chu-pr46039252",
+    "source": "batdongsan",
+    "property_type": "Land",
+    "district": "Chương Mỹ"
+  },
+  {
+    "title": "Biệt thự liền kề Trung Hòa, Cầu Giấy. Thang máy. 2 thoáng đẹp. 21 tỷ",
+    "address": "Cầu Giấy",
+    "url": "https://mogi.vn/quan-cau-giay/mua-nha-biet-thu-lien-ke/biet-thu-lien-ke-trung-hoa-cau-giay-thang-may-2-thoang-dep-21-ty-id21511910",
+    "source": "mogi",
+    "property_type": "Land",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "Nhà Cầu Giấy – 50m-MT 3.6m– Ô tô đỗ cửa – Thang máy xịn – Kiến trúc",
+    "address": "Cầu Giấy",
+    "url": "https://mogi.vn/quan-cau-giay/mua-can-ho-chung-cu/nha-cau-giay-50m-mt-3-6m-o-to-do-cua-thang-may-xin-kien-truc-id22740796",
+    "source": "mogi",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "Căn Góc 3PN hiếm hoi, trục huyết mạch Lý Sơn, Long Biên. Chỉ 5.3 tỷ",
+    "address": "Long Biên",
+    "url": "https://mogi.vn/quan-long-bien/mua-can-ho-chung-cu/can-goc-3pn-hiem-hoi-truc-huyet-mach-ly-son-long-bien-chi-5-3-ty-id22746672",
+    "source": "mogi",
+    "property_type": "Apartment",
+    "district": "Long Biên"
+  },
+  {
+    "title": "Hàng đầu tư đỉnh! Đất mặt phố Nguyễn Văn Huyên, Cầu giấy. 300m2 MT 15m",
+    "address": "Cầu Giấy",
+    "url": "https://mogi.vn/quan-cau-giay/mua-dat-tho-cu/hang-dau-tu-dinh-dat-mat-pho-nguyen-van-huyen-cau-giay-300m2-mt-15m-id22548126",
+    "source": "mogi",
+    "property_type": "Land",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "Đất phân lô Hoàng Công Chất, Phú Diễn, Bắc từ Liêm. Lô góc 63m2",
+    "address": "Bắc Từ Liêm",
+    "url": "https://mogi.vn/quan-bac-tu-liem/mua-dat-tho-cu/dat-phan-lo-hoang-cong-chat-phu-dien-bac-tu-liem-lo-goc-63m2-id22545356",
+    "source": "mogi",
+    "property_type": "Land",
+    "district": "Bắc Từ Liêm"
+  },
+  {
+    "title": "Đất Liền kề Nguyễn Thị Định, Cầu Giấy. Lô góc 105m2 MT 10m. Vỉa hè 3m",
+    "address": "Cầu Giấy",
+    "url": "https://mogi.vn/quan-cau-giay/mua-dat-tho-cu/dat-lien-ke-nguyen-thi-dinh-cau-giay-lo-goc-105m2-mt-10m-via-he-3m-id22516484",
+    "source": "mogi",
+    "property_type": "Land",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "Còn 2 lô duy nhất! Đất phân lô Lạc Long Quân, liên cơ Tây Hồ. 70m2 16T",
+    "address": "Tây Hồ",
+    "url": "https://mogi.vn/quan-tay-ho/mua-dat-tho-cu/con-2-lo-duy-nhat-dat-phan-lo-lac-long-quan-lien-co-tay-ho-70m2-16t-id22515326",
+    "source": "mogi",
+    "property_type": "Land",
+    "district": "Tây Hồ"
+  },
+  {
+    "title": "45 phút trước 3 PHÙNG KHOANG 48M X 6 Tầng hơn 8 tỷ dòng tiền 400 triệu/năm . 9 PN Nhà ngõ, hẻm 8,95 tỷ 186 tr/m² 48 m² Q",
+    "address": "Nam Từ Liêm",
+    "url": "https://www.nhatot.com/mua-ban-quan-nam-tu-liem-ha-noi/133253854.htm",
+    "source": "nhatot",
+    "property_type": "Apartment",
+    "district": "Nam Từ Liêm"
+  },
+  {
+    "title": "1 giờ trước 6 10 PHÒNG KK – THANG MÁY – DÒNG TIỀN 55 TRIỆU/THÁNG GIỮA LÕI XÃ ĐÀN! 10 PN Căn hộ dịch vụ, mini 14 tỷ 292 t",
+    "address": "Đống Đa",
+    "url": "https://www.nhatot.com/mua-ban-quan-dong-da-ha-noi/133541443.htm",
+    "source": "nhatot",
+    "property_type": "Apartment",
+    "district": "Đống Đa"
+  },
+  {
+    "title": "3 NHÀ ĐẸP NGÕ 224 ĐƯỜNG HOÀNG MAI VIEW HỒ – LÔ GÓC – 2 MẶT THOÁNG – THANG MÁY – CHỈ XÁCH… Thỏa thuận 54 m² 3 4 Quận Hoàn",
+    "address": "Hoàng Mai",
+    "url": "https://bds123.vn/nha-dep-ngo-224-duong-hoang-mai-view-ho-lo-goc-2-mat-thoang-thang-may-chi-xach-vali-ve-o-pr919020.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Hoàng Mai"
+  },
+  {
+    "title": "3 Bán căn hộ MOONLIGHT 2 – Góc nhìn về giá trị sống Thỏa thuận 72 m² 2 2 An Lạc Green Symphony Huyện Hoài Đức, Hà Nội Ho",
+    "address": "Hoài Đức",
+    "url": "https://bds123.vn/moonlight-2-goc-nhin-ve-gia-tri-song-pr918804.html",
+    "source": "bds123",
+    "property_type": "Apartment",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "12 Căn hộ Moonlight 2 An Lạc: Ốc đảo xanh phía Tây Hà Nội, giá F0 cực phẩm Thỏa thuận 80 m² 2 2 An Lạc Green Symphony Hu",
+    "address": "Hoài Đức",
+    "url": "https://bds123.vn/can-ho-moonlight-2-an-lac-oc-dao-xanh-phia-tay-ha-noi-gia-f0-cuc-pham-pr918637.html",
+    "source": "bds123",
+    "property_type": "Apartment",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "4 MOONLIGHT 2 – AN LẠC GREEN SYMPHONY MỞ BOOKING Thỏa thuận 80 m² An Lạc Green Symphony Huyện Hoài Đức, Hà Nội Nguyen Ki",
+    "address": "Hoài Đức",
+    "url": "https://bds123.vn/moonlight-2-an-lac-green-symphony-mo-booking-pr918636.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "5 Nhà Hiếm: Phường Nghĩa Tân, Quận Cầu Giấy - Giá bán: 3 tỷ 150 triệu đồng- Sổ đỏ chính… 3.2 tỷ 50 m² 2 2 Quận Cầu Giấy,",
+    "address": "Cầu Giấy",
+    "url": "https://bds123.vn/nha-hiem-phuong-nghia-tan-quan-cau-giay-gia-ban-3-ty-150-trieu-dong-so-do-chinh-chu-pr891489.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "2 MOONLIGHT 2 – CĂN HỘ CAO CẤP TRUNG TÂM ANLAC GREEN SYMPHONY Thỏa thuận 70 m² 2 2 An Lạc Green Symphony Huyện Hoài Đức,",
+    "address": "Hoài Đức",
+    "url": "https://bds123.vn/moonlight-2-can-ho-cao-cap-trung-tam-anlac-green-symphony-pr918805.html",
+    "source": "bds123",
+    "property_type": "Apartment",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "16 CHÍNH CHỦ CẦN BÁN CĂN 2 NGỦ GELEXIA 727 TAM TRINH – 10 PHÚT LÊN HỒ GƯƠM Thỏa thuận 76 m² 2 2 Gelexia Riverside Quận H",
+    "address": "Hoàng Mai",
+    "url": "https://bds123.vn/chinh-chu-can-ban-can-2-ngu-gelexia-727-tam-trinh-10-phut-len-ho-guom-pr918370.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Hoàng Mai"
+  },
+  {
+    "title": "Bán kho xưởng DT 8100m2 An Khánh, Hoài Đức, Hà Nội. Thỏa thuận 8.1 m² Huyện Hoài Đức, Hà Nội phạm sỹ hùng Đăng 5 giờ trư",
+    "address": "Hoài Đức",
+    "url": "https://bds123.vn/ban-kho-xuong-dt-8100m2-an-khanh-hoai-duc-ha-noi-pr145677.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Hoài Đức"
+  },
+  {
+    "title": "Bán kho xưởng DT 1500m2 KCN Thạch Thất Quốc Oai, Hà Nội. Thỏa thuận 1.5 m² Quận Long Biên, Hà Nội phạm sỹ hùng Đăng 5 gi",
+    "address": "Long Biên",
+    "url": "https://bds123.vn/ban-kho-xuong-dt-4000m2-bien-giang-ha-dong-ha-noi-pr146520.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Long Biên"
+  },
+  {
+    "title": "7 Bán đất trung tâm Làng Lụa Vạn Phúc –OTO VÀO ĐẤT-SIÊU NỞ HẬU| MIỄN TRUNG GIAN MÔI GIỚI Thỏa thuận 68.8 m² Quận Hà Đông",
+    "address": "Hà Đông",
+    "url": "https://bds123.vn/cc-ban-dat-trung-tam-lang-lua-van-phuc-oto-vao-dat-sieu-no-hau-mien-trung-gian-moi-gioi-pr910381.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Hà Đông"
+  },
+  {
+    "title": "1 cần bán 80m đất không quy hoạch thôn Cộng Hoà 235 triệu 80 m² Huyện Sóc Sơn, Hà Nội Đinh Thị Bích Phượng Đăng 2 tuần t",
+    "address": "Sóc Sơn",
+    "url": "https://bds123.vn/can-ban-80m-dat-khong-quy-hoach-thon-cong-hoa-pr918345.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Sóc Sơn"
+  },
+  {
+    "title": "3 Chính chủ cần bán đấu giá Bình Minh hà nội Thỏa thuận 69 m² Huyện Thanh Oai, Hà Nội Nguyễn Thị Hạnh Đăng 1 tháng trước",
+    "address": "Thanh Oai",
+    "url": "https://bds123.vn/chinh-chu-can-ban-dau-gia-binh-minh-ha-noi-pr917511.html",
+    "source": "bds123",
+    "property_type": "Land",
+    "district": "Thanh Oai"
+  },
+  {
+    "title": "Cực hiếm nhà Hoàng Hoa Thám Ba Đình gần ô tô phân khúc hiếm chỉ 7 tỷ",
+    "address": "Ba Đình",
+    "url": "https://nhaongay.vn/ban-nha-rieng/cuc-hiem-nha-hoang-hoa-tham-ba-dinh-gan-o-to-phan-khuc-hiem-chi-7-ty",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Ba Đình"
+  },
+  {
+    "title": "Vị trí đẹp, kết nối nhanh các phố Bạch Mai, Trần Khát Chân, Minh Khai.",
+    "address": "Hai Bà Trưng",
+    "url": "https://nhaongay.vn/ban-nha-mat-pho/vi-tri-dep-ket-noi-nhanh-cac-pho-bach-mai-tran-khat-chan-minh-khai",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Hai Bà Trưng"
+  },
+  {
+    "title": "Nhà đẹp Thanh Xuân, gần công viên và trung tâm mua sắm, môi trường sống chất lượng.",
+    "address": "Thanh Xuân",
+    "url": "https://nhaongay.vn/ban-nha-rieng/nha-dep-thanh-xuan-gan-cong-vien-va-trung-tam-mua-sam-moi-truong-song-chat-luong",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Thanh Xuân"
+  },
+  {
+    "title": "Bán nhà khu vực Khương Đình, Thanh Xuân – Giá cạnh tranh, pháp lý rõ ràng.",
+    "address": "Thanh Xuân",
+    "url": "https://nhaongay.vn/ban-nha-mat-pho/ban-nha-khu-vuc-khuong-dinh-thanh-xuan-gia-canh-tranh-phap-ly-ro-rang",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Thanh Xuân"
+  },
+  {
+    "title": "Bán nhà phân lô Thanh Xuân, đường rộng thông thoáng, ô tô tránh nhau.",
+    "address": "Thanh Xuân",
+    "url": "https://nhaongay.vn/ban-nha-mat-pho/ban-nha-phan-lo-thanh-xuan-duong-rong-thong-thoang-o-to-tranh-nhau",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Thanh Xuân"
+  },
+  {
+    "title": "Bán nhà đất Thanh Xuân giá tốt, cơ hội đầu tư sinh lời hấp dẫn.",
+    "address": "Thanh Xuân",
+    "url": "https://nhaongay.vn/ban-nha-mat-pho/ban-nha-dat-thanh-xuan-gia-tot-co-hoi-dau-tu-sinh-loi-hap-dan",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Thanh Xuân"
+  },
+  {
+    "title": "🔥 CHO THUÊ 243M² TẦNG 1 – 6TH ELEMENT – ĐẸP HIẾM – PHÙ HỢP NGÂN HÀNG/THƯƠNG HIỆU LỚN 🔥",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-243m-tang-1-6th-element-dep-hiem-phu-hop-ngan-hangthuong-hieu-lon",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "🌟 CHO THUÊ MẶT BẰNG 243m2 – TẦNG 1 TÒA 6TH ELEMENT, TÂY HỒ TÂY - NGÂN HÀNG, NHÀ HÀNG, SHOWROOM, THỜI TRANG 🌟",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-mat-bang-243m2-tang-1-toa-6th-element-tay-ho-tay-ngan-hang-nha-hang-showroom-thoi-trang",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "📢 CHO THUÊ MẶT BẰNG TẦNG 1 – 6TH ELEMENT | 243m² | PHÙ HỢP NGÂN HÀNG – NHÀ HÀNG – SHOWROOM",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-mat-bang-tang-1-6th-element-243m-phu-hop-ngan-hang-nha-hang-showroom",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "🌟 CHO THUÊ MẶT BẰNG – TẦNG 1 6TH ELEMENT | 243m² | ĐẸP SẴN – VÀO LÀM NGAY! 🌟",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-mat-bang-tang-1-6th-element-243m-dep-san-vao-lam-ngay",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "🔥 CHO THUÊ MẶT BẰNG THƯƠNG MẠI CAO CẤP – TẦNG 1, 6TH ELEMENT TÂY HỒ TÂY 🔥",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-mat-bang-thuong-mai-cao-cap-tang-1-6th-element-tay-ho-tay",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "🌟 CHO THUÊ MẶT BẰNG CAO CẤP 243M2– TẦNG 1 TÒA 6TH ELEMENT, TÂY HỒ TÂY 🌟",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/cho-thue-mat-bang-cao-cap-243m2-tang-1-toa-6th-element-tay-ho-tay",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "✨ Mặt bằng sang trọng tầng 1 – 6th Element Tây Hồ Tây | View đẹp, hoàn thiện cao cấp",
+    "address": "Cầu Giấy",
+    "url": "https://nhaongay.vn/cua-hang-ki-ot/mat-bang-sang-trong-tang-1-6th-element-tay-ho-tay-view-dep-hoan-thien-cao-cap",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Cầu Giấy"
+  },
+  {
+    "title": "Cho thuê văn phòng 150m² tại tầng 5 Chung cư Xuân Mai Tower, Hà Đông",
+    "address": "Hà Đông",
+    "url": "https://nhaongay.vn/thue-van-phong/cho-thue-van-phong-150m-tai-tang-5-chung-cu-xuan-mai-tower-ha-dong",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Hà Đông"
+  },
+  {
+    "title": "Cho thuê căn hộ 1 phòng ngủ tại Times City",
+    "address": "Hai Bà Trưng",
+    "url": "https://nhaongay.vn/thue-can-ho-chung-cu/cho-thue-can-ho-1-phong-ngu-tai-times-city",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Hai Bà Trưng"
+  },
+  {
+    "title": "CHO THUÊ NHÀ NGUYÊN CĂN – MẶT PHỐ TÂN XUÂN, BẮC TỪ LIÊM",
+    "address": "Bắc Từ Liêm",
+    "url": "https://nhaongay.vn/thue-nha-rieng/cho-thue-nha-nguyen-can--mat-pho-tan-xuan-bac-tu-liem",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Bắc Từ Liêm"
+  },
+  {
+    "title": "Cho thuê căn hộ S2.08 Vinhomes Ocean Park – Full nội thất, chỉ 8 triệu/tháng",
+    "address": "Gia Lâm",
+    "url": "https://nhaongay.vn/thue-can-ho-chung-cu/cho-thue-can-ho-s208-vinhomes-ocean-park--full-noi-that-chi-8-trieuthang",
+    "source": "nhaongay",
+    "property_type": "Apartment",
+    "district": "Gia Lâm"
+  },
+  {
+    "title": "Lê Thuý Hằng NN0849",
+    "address": "Hoài Đức",
+    "url": "https://nhaongay.vn/nha-moi-gioi/hanglt-nhaongay-vn-405",
+    "source": "nhaongay",
+    "property_type": "Land",
+    "district": "Hoài Đức"
   }
 ]

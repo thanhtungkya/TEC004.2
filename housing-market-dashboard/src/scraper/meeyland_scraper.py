@@ -2,10 +2,16 @@ import re
 from src.scraper.selenium_scraper import (
     classify_property_type, extract_area, extract_district,
     extract_price, normalise_price_text,
-    render_listing_cards, HANOI_DISTRICTS
+    collect_cards_from_sources, SCRAPE_LINK_LIMIT, HANOI_DISTRICTS
 )
 
 MEEYLAND_URL = 'https://meeyland.com/mua-ban-nha-dat-ha-noi-b42'
+MEEYLAND_URLS = [
+    'https://meeyland.com/mua-ban-nha-dat-ha-noi-b42',
+    'https://meeyland.com/mua-ban-can-ho-chung-cu-ha-noi-b42',
+    'https://meeyland.com/mua-ban-dat-ha-noi-b42',
+    'https://meeyland.com/mua-ban-biet-thu-ha-noi-b42',
+]
 
 # Meeyland property detail URLs always end with a purely numeric ID segment.
 # e.g. https://meeyland.com/mua-ban-nha-dat/.../123456
@@ -13,11 +19,16 @@ MEEYLAND_URL = 'https://meeyland.com/mua-ban-nha-dat-ha-noi-b42'
 _MEEYLAND_PROPERTY_RE = re.compile(r'/\d+$')
 
 
-def scrape_meeyland(progress_cb=None, log_cb=None, abort_event=None):
+def scrape_meeyland(progress_cb=None, log_cb=None, abort_event=None, existing_urls=None, link_limit=SCRAPE_LINK_LIMIT):
     records = []
-    cards = render_listing_cards(
-        MEEYLAND_URL,
-        '.card-article a[href]', '.card-article'
+    cards = collect_cards_from_sources(
+        'meeyland',
+        MEEYLAND_URLS,
+        '.card-article a[href]', '.card-article',
+        existing_urls=existing_urls,
+        limit=link_limit,
+        log_cb=log_cb,
+        abort_event=abort_event,
     )
     seen_urls = set()
     for item in cards:
@@ -60,4 +71,4 @@ def scrape_meeyland(progress_cb=None, log_cb=None, abort_event=None):
         except Exception as exc:
             if log_cb:
                 log_cb('meeyland', 'Fail', f"{url} - {exc}")
-    return records[:200]
+    return records[:link_limit]
