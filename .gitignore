@@ -6,7 +6,6 @@ GEMINI.md
 .brv/
 .env
 .env.local
-*.sqlite
 .DS_Store
 dist/
 build/
