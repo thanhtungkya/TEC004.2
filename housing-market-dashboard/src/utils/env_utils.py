@@ -15,13 +15,13 @@ def get_ai_config():
     # Default models if not specified
     if not model:
         if provider == "chatgpt":
-            model = "gpt-4o-mini"
+            model = "gpt-5.6-sol"
         elif provider == "claude":
-            model = "claude-3-5-haiku-20241022"
+            model = "claude-sonnet-5"
         elif provider == "gemini":
-            model = "gemini-1.5-flash"
+            model = "gemini-3.5-flash"
         else:
-            model = "gpt-3.5-turbo"
+            model = "gpt-5.6-sol"
 
     masked_key = ""
     if api_key:
