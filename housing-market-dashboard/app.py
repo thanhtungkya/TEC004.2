@@ -13,7 +13,9 @@ from src.database.create_tables import create_tables
 from src.database.property_repository import PropertyRepository
 from src.processing.transform_data import DataCleaner, transform_records
 from src.services.openai_service import predict_prices
+from src.services.cma_valuation_service import CMAValuationEngine
 from src.database.db_connection import get_connection
+from src.utils.env_utils import get_ai_config, save_ai_config
 
 
 def run_all_scrapers(*args, **kwargs):
@@ -656,6 +658,27 @@ def settings():
     return render_template("settings.html")
 
 
+@app.get("/api/settings/ai")
+def api_get_ai_settings():
+    return jsonify({"status": "ok", "config": get_ai_config()})
+
+
+@app.post("/api/settings/ai")
+def api_save_ai_settings():
+    payload = request.get_json(silent=True) or {}
+    provider = (payload.get("provider") or "chatgpt").strip().lower()
+    api_key = (payload.get("api_key") or "").strip()
+    model = (payload.get("model") or "").strip()
+    custom_endpoint = (payload.get("custom_endpoint") or "").strip()
+
+    valid_providers = ("chatgpt", "claude", "gemini", "custom")
+    if provider not in valid_providers:
+        return jsonify({"status": "error", "message": "Invalid provider selection."}), 400
+
+    save_ai_config(provider, api_key, model, custom_endpoint)
+    return jsonify({"status": "ok", "message": "AI settings saved successfully.", "config": get_ai_config()})
+
+
 
 @app.post("/api/collect")
 def api_collect():
@@ -886,26 +909,63 @@ def api_stop_scraper():
 def api_analyze_prices():
     repo = PropertyRepository()
     all_rows = [dict(row) for row in repo.fetch_all()]
-    rows_to_analyze = [row for row in all_rows if row.get('price') and row.get('area') and not row.get('ai_predicted_price')]
-    rows_to_analyze = rows_to_analyze[:10]
-    
+    if not all_rows:
+        return jsonify({"status": "error", "message": "No properties found in database. Run collection first."}), 400
+
+    cma_engine = CMAValuationEngine()
+    dataset = cma_engine.prepare_market_dataset(all_rows)
+
+    rows_to_analyze = [row for row in all_rows if row.get('price') and row.get('area')]
     if not rows_to_analyze:
-        return jsonify({"status": "ok", "message": "No new properties to analyze."})
+        rows_to_analyze = all_rows
 
-    predictions = predict_prices(rows_to_analyze)
+    # Accept optional limit from request payload/query (default to all)
+    limit = request.args.get('limit', type=int) or (request.get_json(silent=True) or {}).get('limit')
+    if limit and limit > 0:
+        rows_to_analyze = rows_to_analyze[:limit]
+
+    reports = []
+    predictions_to_save = {}
+
+    for prop in rows_to_analyze:
+        report = cma_engine.analyze_property_valuation(prop, dataset)
+        reports.append(report)
+        fair_price = report["valuation"]["fair_price_billion"]
+        predictions_to_save[prop["id"]] = fair_price
+
+    if predictions_to_save:
+        conn = get_connection()
+        try:
+            for pid, price in predictions_to_save.items():
+                conn.execute("UPDATE properties SET ai_predicted_price = ? WHERE id = ?", (price, pid))
+            conn.commit()
+        finally:
+            conn.close()
+
+    primary_report = reports[0] if reports else None
+
+    return jsonify({
+        "status": "ok",
+        "message": f"Successfully analyzed {len(reports)} properties using 4-step CMA & AI Valuation Model.",
+        "primary_report": primary_report,
+        "reports": reports
+    })
+
+
+@app.get("/api/property/<int:property_id>/valuation")
+def api_property_valuation(property_id):
+    repo = PropertyRepository()
+    all_rows = [dict(row) for row in repo.fetch_all()]
+    target_row = next((row for row in all_rows if row.get("id") == property_id), None)
     
-    if not predictions:
-        return jsonify({"status": "error", "message": "Failed to get predictions."})
+    if not target_row:
+        return jsonify({"status": "error", "message": f"Property ID {property_id} not found."}), 404
 
-    conn = get_connection()
-    try:
-        for pid, price in predictions.items():
-            conn.execute("UPDATE properties SET ai_predicted_price = ? WHERE id = ?", (price, pid))
-        conn.commit()
-    finally:
-        conn.close()
+    cma_engine = CMAValuationEngine()
+    dataset = cma_engine.prepare_market_dataset(all_rows)
+    report = cma_engine.analyze_property_valuation(target_row, dataset)
 
-    return jsonify({"status": "ok", "message": f"Analyzed {len(predictions)} properties."})
+    return jsonify({"status": "ok", "report": report})
 
 
 @app.get("/api/summary")

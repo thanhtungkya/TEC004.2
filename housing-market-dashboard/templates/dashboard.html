@@ -19,8 +19,7 @@
           <a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a>
           <a class="nav-link" href="/database">Database <small>Storage</small></a>
           <a class="nav-link" href="/analytics">Analytics <small>Insights</small></a>
-          
-          <a class="nav-link" href="/settings">Settings <small>Theme</small></a>
+          <a class="nav-link" href="/settings">Settings <small>AI & Theme</small></a>
         </nav>
       </aside>
       <main class="main-panel">
@@ -123,6 +122,103 @@
       </main>
     </div>
 
+    <!-- AI Valuation Modal (Placed in DOM BEFORE script) -->
+    <div id="valuationModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+      <div class="modal-card card" style="max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; border-radius: var(--radius-xl); border: 1px solid var(--color-line); box-shadow: var(--shadow-soft); padding: 24px;">
+        <button id="closeModalBtn" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--color-muted); line-height: 1;">&times;</button>
+        
+        <div id="modalLoadingState" style="text-align: center; padding: 60px 20px;">
+          <div style="font-size: 2.8rem; margin-bottom: 16px;">🤖⚡</div>
+          <h3 style="margin: 0 0 8px;">Đang chạy Mô hình Định giá AI & CMA...</h3>
+          <p class="muted" style="margin: 0;">Đang chuẩn hóa đơn giá m², lọc tin ảo và tìm kiếm bất động sản so sánh tương đồng.</p>
+        </div>
+
+        <div id="modalReportContent" style="display: none; gap: 20px; flex-direction: column;">
+          <!-- Header -->
+          <div class="panel-header" style="border-bottom: 1px solid var(--color-line); padding-bottom: 16px;">
+            <div>
+              <span class="badge badge-live">AI Valuation & CMA Insights</span>
+              <h2 id="reportTitle" style="margin: 8px 0 4px; font-size: 1.3rem;"></h2>
+              <p id="reportSubtitle" class="muted" style="margin: 0;"></p>
+            </div>
+            <div style="text-align: right;">
+              <span id="confidenceBadge" class="badge badge-info"></span>
+            </div>
+          </div>
+
+          <!-- Price Range & Position Banner -->
+          <div style="background: var(--color-surface-2); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--color-line);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; color: var(--color-muted);">Mức định giá AI đề xuất</span>
+              <span id="pricePositionBadge" class="badge"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px;">
+              <div>
+                <span style="font-size: 0.85rem; color: var(--color-muted);">Thấp nhất</span>
+                <div id="minPriceVal" style="font-weight: 700; font-size: 1.1rem; color: var(--color-foreground);"></div>
+              </div>
+              <div style="text-align: center;">
+                <span style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">Giá hợp lý đề xuất</span>
+                <div id="fairPriceVal" style="font-weight: 800; font-size: 2.2rem; color: var(--color-primary);"></div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.85rem; color: var(--color-muted);">Cao nhất</span>
+                <div id="maxPriceVal" style="font-weight: 700; font-size: 1.1rem; color: var(--color-foreground);"></div>
+              </div>
+            </div>
+            <p id="reportRationale" style="margin: 16px 0 0; font-size: 0.95rem; color: var(--color-foreground); line-height: 1.5; background: var(--color-surface); padding: 12px 16px; border-radius: var(--radius-md); border-left: 4px solid var(--color-primary);"></p>
+          </div>
+
+          <!-- District Index & Market Temperature -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+            <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
+              <span class="small-note" style="color: var(--color-muted);">Đơn giá Trung vị Quận</span>
+              <div id="districtMedianPpm2" style="font-weight: 700; font-size: 1.2rem; margin-top: 4px;"></div>
+            </div>
+            <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
+              <span class="small-note" style="color: var(--color-muted);">Nhiệt độ Thị trường</span>
+              <div id="districtTemp" style="font-weight: 700; font-size: 1.1rem; margin-top: 4px; color: var(--color-accent);"></div>
+            </div>
+            <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
+              <span class="small-note" style="color: var(--color-muted);">Biến động Giá</span>
+              <div id="districtMomentum" style="font-weight: 700; font-size: 1.1rem; margin-top: 4px; color: var(--color-success);"></div>
+            </div>
+          </div>
+
+          <!-- Comparable Properties (CMA Table) -->
+          <div>
+            <h4 style="margin: 0 0 10px;">Tài sản So sánh Tương đồng (CMA Peers)</h4>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tài sản So sánh</th>
+                    <th>Quận</th>
+                    <th>Diện tích</th>
+                    <th>Giá niêm yết</th>
+                    <th>Đơn giá/m²</th>
+                    <th>Độ tương đồng</th>
+                  </tr>
+                </thead>
+                <tbody id="cmaTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Strategic Recommendations -->
+          <div style="background: var(--color-surface-2); padding: 18px; border-radius: var(--radius-lg); border: 1px solid var(--color-line);">
+            <h4 style="margin: 0 0 12px;">Khuyến nghị Chiến lược</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem;">
+              <div><strong style="color: var(--color-primary);">💼 Nhà đầu tư:</strong> <span id="recInvestor"></span></div>
+              <div><strong style="color: var(--color-success);">🏡 Người mua ở:</strong> <span id="recBuyer"></span></div>
+              <div><strong style="color: var(--color-accent);">🤝 Môi giới:</strong> <span id="recBroker"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const chartData = {{ chart_data_json|safe }};
       const palette = ['#1e40af','#3b82f6','#38bdf8','#10b981','#d97706','#8b5cf6','#ef4444','#14b8a6','#f97316','#84cc16'];
@@ -183,19 +279,111 @@
       buildCharts();
       window.addEventListener('tec-theme-change', buildCharts);
 
+      // AI Valuation Modal Logic
+      function getModalElements() {
+        return {
+          modal: document.getElementById('valuationModal'),
+          closeBtn: document.getElementById('closeModalBtn'),
+          loadingState: document.getElementById('modalLoadingState'),
+          reportContent: document.getElementById('modalReportContent')
+        };
+      }
+
+      function hideModal() {
+        const { modal } = getModalElements();
+        if (modal) modal.style.display = 'none';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const { modal, closeBtn } = getModalElements();
+        if (closeBtn) closeBtn.addEventListener('click', hideModal);
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal();
+          });
+        }
+      });
+
+      function renderValuationReport(report) {
+        if (!report) return;
+        const val = report.valuation || {};
+        const idx = report.district_index || {};
+        const recs = report.recommendations || {};
+
+        document.getElementById('reportTitle').textContent = report.title || 'Property Valuation';
+        document.getElementById('reportSubtitle').textContent = `${report.district} · ${report.property_type || 'BĐS'} · ${report.area}m² · Niêm yết: ${report.listed_price_billion} tỷ VND`;
+        
+        document.getElementById('confidenceBadge').textContent = `Độ tin cậy: ${val.confidence_level || 'Cao'}`;
+        
+        const posBadge = document.getElementById('pricePositionBadge');
+        posBadge.textContent = val.price_position || 'Định giá hợp lý';
+        posBadge.className = `badge badge-${val.badge_type || 'info'}`;
+
+        document.getElementById('minPriceVal').textContent = `${val.min_price_billion} tỷ`;
+        document.getElementById('fairPriceVal').textContent = `${val.fair_price_billion} tỷ VND`;
+        document.getElementById('maxPriceVal').textContent = `${val.max_price_billion} tỷ`;
+
+        document.getElementById('reportRationale').textContent = val.rationale || '';
+
+        document.getElementById('districtMedianPpm2').textContent = `${idx.median_price_per_m2 || 0} triệu/m²`;
+        document.getElementById('districtTemp').textContent = idx.market_temperature || 'Ổn định';
+        document.getElementById('districtMomentum').textContent = idx.price_momentum || '0.0%';
+
+        // CMA Comparables
+        const cmaBody = document.getElementById('cmaTableBody');
+        if (cmaBody) {
+          cmaBody.innerHTML = '';
+          (report.comparables || []).forEach(comp => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><a href="${comp.url || '#'}" target="_blank" style="color:var(--color-primary); font-weight:500;">${comp.title}</a></td>
+              <td>${comp.district}</td>
+              <td>${comp.area} m²</td>
+              <td>${comp.price} triệu</td>
+              <td><strong>${comp.price_per_m2}</strong> triệu/m²</td>
+              <td><span class="badge badge-success">${comp.similarity_score}%</span></td>
+            `;
+            cmaBody.appendChild(tr);
+          });
+        }
+
+        // Recommendations
+        document.getElementById('recInvestor').textContent = recs.investor || '';
+        document.getElementById('recBuyer').textContent = recs.buyer || '';
+        document.getElementById('recBroker').textContent = recs.broker || '';
+      }
+
       const analyzeBtn = document.getElementById('analyzeBtn');
       if (analyzeBtn) {
         analyzeBtn.addEventListener('click', async () => {
+          const { modal, loadingState, reportContent } = getModalElements();
+          
           analyzeBtn.disabled = true;
           analyzeBtn.textContent = 'Analyzing...';
+          
+          if (modal) {
+            modal.style.display = 'flex';
+            if (loadingState) loadingState.style.display = 'block';
+            if (reportContent) reportContent.style.display = 'none';
+          }
+
           try {
             const res = await fetch('/api/analyze-prices', {method: 'POST'});
             const data = await res.json();
-            alert(data.message);
-            window.location.reload();
+            
+            if (data.status === 'ok' && data.primary_report) {
+              renderValuationReport(data.primary_report);
+              if (loadingState) loadingState.style.display = 'none';
+              if (reportContent) reportContent.style.display = 'flex';
+            } else {
+              alert(data.message || 'Analysis failed');
+              hideModal();
+            }
           } catch(e) {
-            alert('Error: ' + e);
+            alert('Error running AI valuation: ' + e);
+            hideModal();
           }
+
           analyzeBtn.disabled = false;
           analyzeBtn.textContent = 'Analyze Prices (AI)';
         });

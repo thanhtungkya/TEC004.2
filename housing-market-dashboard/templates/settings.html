@@ -11,14 +11,15 @@
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h2>Hanoi Housing Market Intelligence</h2></div>
-        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link active" href="/settings">Settings <small>Theme</small></a></nav>
+        <nav class="nav-group"><div class="nav-group-title">Main</div><a class="nav-link" href="/dashboard">Dashboard <small>Overview</small></a><a class="nav-link" href="/properties">Properties <small>Listings</small></a><a class="nav-link" href="/data-collection">Data Collection <small>Scrape</small></a><a class="nav-link" href="/database">Database <small>Storage</small></a><a class="nav-link" href="/analytics">Analytics <small>Insights</small></a><a class="nav-link active" href="/settings">Settings <small>AI & Theme</small></a></nav>
       </aside>
       <main class="main-panel">
         <header class="topbar">
-          <div><h1>Settings</h1><p>Personalize the interface and keep dashboard controls simple for the analyst workflow.</p></div>
+          <div><h1>Settings</h1><p>Personalize the interface and configure AI Price Analysis credentials securely.</p></div>
           <div class="topbar-actions"><span class="chip" data-theme-label>Light mode</span></div>
         </header>
         <section class="page-content">
+          <!-- Appearance Card -->
           <article class="card hero-card">
             <span class="ambient-orb"></span>
             <div class="panel-header">
@@ -41,8 +42,201 @@
               </label>
             </div>
           </article>
+
+          <!-- AI Configuration Card -->
+          <article class="card hero-card" style="margin-top: 24px;">
+            <div class="panel-header">
+              <div>
+                <h3>AI Price Analysis Configuration</h3>
+                <p class="muted">Configure AI provider, API key, model, and custom endpoint for automated market price predictions.</p>
+              </div>
+              <span class="badge badge-info" id="aiConfigBadge">Stored in .env</span>
+            </div>
+
+            <form id="aiConfigForm" style="display: flex; flex-direction: column; gap: 18px; margin-top: 16px;">
+              <!-- Provider Selection -->
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="aiProviderSelect" style="font-weight: 600;">AI Provider</label>
+                <select id="aiProviderSelect" class="form-control" style="padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground);">
+                  <option value="chatgpt">ChatGPT (OpenAI)</option>
+                  <option value="claude">Claude (Anthropic)</option>
+                  <option value="gemini">Gemini (Google)</option>
+                  <option value="custom">Custom AI API</option>
+                </select>
+              </div>
+
+              <!-- API Key Input -->
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="aiApiKeyInput" style="font-weight: 600;">AI API Key</label>
+                <div style="position: relative; display: flex; align-items: center;">
+                  <input type="password" id="aiApiKeyInput" placeholder="Enter your API Key..." class="form-control" style="width: 100%; padding: 10px 14px; padding-right: 44px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground);" />
+                  <button type="button" id="toggleApiKeyBtn" style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--color-muted); font-size: 1.1rem;" title="Toggle Visibility">👁️</button>
+                </div>
+                <small class="muted">Keys are saved locally in root <code>.env</code> file (never pushed to GitHub).</small>
+              </div>
+
+              <!-- Model Selection -->
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="aiModelSelect" style="font-weight: 600;">AI Model</label>
+                
+                <!-- Dropdown for predefined models (ChatGPT, Claude, Gemini) -->
+                <select id="aiModelSelect" class="form-control" style="padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground);">
+                </select>
+
+                <!-- Input field for custom model name -->
+                <input type="text" id="aiModelInput" placeholder="e.g. llama3, mistral-7b, qwen2.5-coder" class="form-control" style="display: none; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground);" />
+              </div>
+
+              <!-- Custom Endpoint URL (Visible ONLY when Provider is Custom AI API) -->
+              <div class="form-group" id="customEndpointGroup" style="display: none; flex-direction: column; gap: 6px;">
+                <label for="aiCustomEndpointInput" style="font-weight: 600;">Custom AI API Endpoint (Link)</label>
+                <input type="url" id="aiCustomEndpointInput" placeholder="e.g. https://api.together.xyz/v1 or http://localhost:11434/v1" class="form-control" style="padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground);" />
+                <small class="muted">URL endpoint of your OpenAI-compatible service.</small>
+              </div>
+
+              <!-- Save Button & Feedback Message -->
+              <div style="display: flex; align-items: center; gap: 16px; margin-top: 8px;">
+                <button type="submit" class="btn" style="padding: 10px 24px; background: var(--color-primary); color: white; border: none; border-radius: var(--radius-md); font-weight: 600; cursor: pointer;">
+                  Save AI Settings
+                </button>
+                <span id="aiConfigMsg" style="font-weight: 500;"></span>
+              </div>
+            </form>
+          </article>
         </section>
       </main>
     </div>
+
+    <script>
+      const MODEL_PRESETS = {
+        chatgpt: [
+          { value: 'gpt-4o-mini', label: 'gpt-4o-mini (Fast & Recommended)' },
+          { value: 'gpt-4o', label: 'gpt-4o (High Accuracy)' },
+          { value: 'gpt-4-turbo', label: 'gpt-4-turbo' },
+          { value: 'gpt-3.5-turbo', label: 'gpt-3.5-turbo' }
+        ],
+        claude: [
+          { value: 'claude-3-5-haiku-20241022', label: 'claude-3-5-haiku (Fast & Recommended)' },
+          { value: 'claude-3-5-sonnet-20241022', label: 'claude-3-5-sonnet (High Intelligence)' },
+          { value: 'claude-3-opus-20240229', label: 'claude-3-opus' },
+          { value: 'claude-3-haiku-20240307', label: 'claude-3-haiku' }
+        ],
+        gemini: [
+          { value: 'gemini-1.5-flash', label: 'gemini-1.5-flash (Fast & Free tier)' },
+          { value: 'gemini-2.0-flash', label: 'gemini-2.0-flash (Latest Flash)' },
+          { value: 'gemini-1.5-pro', label: 'gemini-1.5-pro (High Reasoning)' }
+        ]
+      };
+
+      const providerSelect = document.getElementById('aiProviderSelect');
+      const apiKeyInput = document.getElementById('aiApiKeyInput');
+      const toggleApiKeyBtn = document.getElementById('toggleApiKeyBtn');
+      const modelSelect = document.getElementById('aiModelSelect');
+      const modelInput = document.getElementById('aiModelInput');
+      const customEndpointGroup = document.getElementById('customEndpointGroup');
+      const customEndpointInput = document.getElementById('aiCustomEndpointInput');
+      const configForm = document.getElementById('aiConfigForm');
+      const configMsg = document.getElementById('aiConfigMsg');
+
+      // Toggle API Key visibility
+      toggleApiKeyBtn.addEventListener('click', () => {
+        if (apiKeyInput.type === 'password') {
+          apiKeyInput.type = 'text';
+          toggleApiKeyBtn.textContent = '🙈';
+        } else {
+          apiKeyInput.type = 'password';
+          toggleApiKeyBtn.textContent = '👁️';
+        }
+      });
+
+      function updateProviderUI(provider, selectedModel) {
+        if (provider === 'custom') {
+          customEndpointGroup.style.display = 'flex';
+          modelSelect.style.display = 'none';
+          modelInput.style.display = 'block';
+          if (selectedModel) modelInput.value = selectedModel;
+        } else {
+          customEndpointGroup.style.display = 'none';
+          modelSelect.style.display = 'block';
+          modelInput.style.display = 'none';
+
+          // Populate preset models
+          modelSelect.innerHTML = '';
+          const presets = MODEL_PRESETS[provider] || [];
+          presets.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.value;
+            opt.textContent = item.label;
+            modelSelect.appendChild(opt);
+          });
+
+          if (selectedModel && Array.from(modelSelect.options).some(o => o.value === selectedModel)) {
+            modelSelect.value = selectedModel;
+          }
+        }
+      }
+
+      providerSelect.addEventListener('change', () => {
+        updateProviderUI(providerSelect.value, '');
+      });
+
+      // Load existing config on page load
+      async function loadAIConfig() {
+        try {
+          const res = await fetch('/api/settings/ai');
+          const data = await res.json();
+          if (data.status === 'ok' && data.config) {
+            const cfg = data.config;
+            providerSelect.value = cfg.provider || 'chatgpt';
+            if (cfg.api_key) {
+              apiKeyInput.value = cfg.api_key;
+            }
+            if (cfg.custom_endpoint) {
+              customEndpointInput.value = cfg.custom_endpoint;
+            }
+            updateProviderUI(cfg.provider || 'chatgpt', cfg.model || '');
+          }
+        } catch (err) {
+          console.error('Failed to load AI config:', err);
+        }
+      }
+
+      configForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        configMsg.textContent = 'Saving...';
+        configMsg.style.color = 'var(--color-muted)';
+
+        const provider = providerSelect.value;
+        const apiKey = apiKeyInput.value.trim();
+        const model = provider === 'custom' ? modelInput.value.trim() : modelSelect.value;
+        const customEndpoint = customEndpointInput.value.trim();
+
+        try {
+          const res = await fetch('/api/settings/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              provider,
+              api_key: apiKey,
+              model,
+              custom_endpoint: customEndpoint
+            })
+          });
+          const data = await res.json();
+          if (data.status === 'ok') {
+            configMsg.textContent = '✓ AI Settings saved to .env';
+            configMsg.style.color = 'var(--color-success)';
+          } else {
+            configMsg.textContent = '✕ Error: ' + (data.message || 'Failed to save');
+            configMsg.style.color = 'var(--color-danger)';
+          }
+        } catch (err) {
+          configMsg.textContent = '✕ Error saving settings';
+          configMsg.style.color = 'var(--color-danger)';
+        }
+      });
+
+      loadAIConfig();
+    </script>
   </body>
 </html>
