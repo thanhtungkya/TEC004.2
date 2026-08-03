@@ -267,8 +267,10 @@ class CMAValuationEngine:
         return {
             "property_id": property_item.get("id"),
             "title": property_item.get("title", "Untitled listing"),
+            "url": property_item.get("url", "#"),
             "district": district,
             "property_type": ptype,
+
             "area": area,
             "listed_price_billion": round(listed_billion, 2),
             "listed_price_per_m2": round(listed_ppm2, 2),

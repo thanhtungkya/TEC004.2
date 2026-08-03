@@ -983,12 +983,17 @@ def api_analyze_prices_batch():
             if saved_report_str:
                 try:
                     rep = json.loads(saved_report_str)
+                    if not rep.get("url") and prop.get("url"):
+                        rep["url"] = prop.get("url")
                     return prop["id"], rep, False
                 except Exception:
                     pass
 
         rep = cma_engine.analyze_property_valuation(prop, _cached_market_dataset)
+        if not rep.get("url") and prop.get("url"):
+            rep["url"] = prop.get("url")
         return prop["id"], rep, True
+
 
     reports = []
     predictions_to_save = {}
@@ -1055,11 +1060,16 @@ def api_analyze_prices_item():
         if saved_report_str:
             try:
                 report = json.loads(saved_report_str)
+                if not report.get("url") and target_row.get("url"):
+                    report["url"] = target_row.get("url")
                 return jsonify({"status": "ok", "report": report, "cached": True})
             except Exception:
                 pass
 
     report = cma_engine.analyze_property_valuation(target_row, _cached_market_dataset)
+    if not report.get("url") and target_row.get("url"):
+        report["url"] = target_row.get("url")
+
     fair_price = report["valuation"]["fair_price_billion"]
     report_json = json.dumps(report, ensure_ascii=False)
 
