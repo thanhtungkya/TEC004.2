@@ -16,3 +16,5 @@ htmlcov/
 *.log
 cloudflared.exe
 start-tunnel.ps1
+downloaded_files/
+*.txt.tmp
