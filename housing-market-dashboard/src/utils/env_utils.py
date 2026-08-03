@@ -1,12 +1,15 @@
 import os
 from pathlib import Path
+from typing import Dict, Any
 
 # Find root project directory (.env location)
 BASE_DIR = Path(__file__).resolve().parents[3]
 ENV_FILE = BASE_DIR / ".env"
 
-def get_ai_config():
+
+def get_ai_config() -> Dict[str, Any]:
     """Retrieve AI configuration from environment variables."""
+
     provider = os.getenv("AI_PROVIDER", "chatgpt").lower()
     api_key = os.getenv("AI_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
     model = os.getenv("AI_MODEL", "")
