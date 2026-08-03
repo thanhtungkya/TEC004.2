@@ -3,6 +3,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import unittest
+from unittest.mock import patch
 import json
 from app import app
 
@@ -17,7 +18,17 @@ class TestAppRoutes(unittest.TestCase):
         self.assertEqual(data["status"], "ok")
         self.assertIn("config", data)
 
-    def test_ai_settings_post(self):
+    @patch("app.save_ai_config")
+    @patch("app.get_ai_config")
+    def test_ai_settings_post(self, mock_get, mock_save):
+        mock_save.return_value = True
+        mock_get.return_value = {
+            "provider": "gemini",
+            "api_key": "AIzaSy...",
+            "model": "gemini-1.5-flash",
+            "custom_endpoint": "",
+            "has_key": True
+        }
         payload = {
             "provider": "gemini",
             "api_key": "AIzaSyTest123",
