@@ -4,8 +4,10 @@ import math
 from datetime import datetime
 from io import StringIO
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, url_for
+
 
 from src.analytics.district_analysis import DistrictAnalysis
 from src.analytics.market_analysis import MarketAnalysis
@@ -903,6 +905,181 @@ def api_stop_scraper():
         scraping_state["abort_event"].set()
         return jsonify({"status": "ok", "message": "Stop signal sent."})
     return jsonify({"status": "error", "message": "Not running."}), 400
+
+
+_cached_market_dataset = None
+_cached_rows = None
+
+
+@app.post("/api/analyze-prices/init")
+def api_analyze_prices_init():
+    global _cached_market_dataset, _cached_rows
+    repo = PropertyRepository()
+    all_rows = [dict(row) for row in repo.fetch_all()]
+    if not all_rows:
+        return jsonify({"status": "error", "message": "No properties found in database. Run collection first."}), 400
+
+    cma_engine = CMAValuationEngine()
+    _cached_market_dataset = cma_engine.prepare_market_dataset(all_rows)
+    _cached_rows = all_rows
+
+    rows_to_analyze = [row for row in all_rows if row.get('price') and row.get('area')]
+    if not rows_to_analyze:
+        rows_to_analyze = all_rows
+
+    limit = request.args.get('limit', type=int) or (request.get_json(silent=True) or {}).get('limit')
+    if limit and limit > 0:
+        rows_to_analyze = rows_to_analyze[:limit]
+
+    items = [
+        {
+            "id": r["id"],
+            "title": r.get("title") or "Bất động sản",
+            "district": r.get("district") or "Chưa rõ",
+            "area": r.get("area") or 0,
+            "price": r.get("price") or 0
+        }
+        for r in rows_to_analyze
+    ]
+
+    return jsonify({
+        "status": "ok",
+        "total": len(items),
+        "items": items
+    })
+
+
+@app.post("/api/analyze-prices/batch")
+def api_analyze_prices_batch():
+    global _cached_market_dataset, _cached_rows
+    data = request.get_json(silent=True) or {}
+    property_ids = data.get("property_ids") or []
+    force_reanalyze = data.get("force", False)
+
+    if not property_ids:
+        return jsonify({"status": "error", "message": "Missing property_ids parameter."}), 400
+
+    repo = PropertyRepository()
+    if _cached_rows is None:
+        _cached_rows = [dict(row) for row in repo.fetch_all()]
+
+    target_rows = [r for r in _cached_rows if r.get("id") in property_ids]
+    if not target_rows:
+        all_rows = [dict(row) for row in repo.fetch_all()]
+        target_rows = [r for r in all_rows if r.get("id") in property_ids]
+
+    if not target_rows:
+        return jsonify({"status": "error", "message": "No matching properties found."}), 404
+
+    cma_engine = CMAValuationEngine()
+    if _cached_market_dataset is None or _cached_market_dataset.empty:
+        all_rows = [dict(row) for row in repo.fetch_all()]
+        _cached_market_dataset = cma_engine.prepare_market_dataset(all_rows)
+
+    def _analyze_single_property(prop):
+        # Skip LLM API call if property was already analyzed and force_reanalyze is False
+        if not force_reanalyze:
+            saved_report_str = prop.get("ai_valuation_report")
+            if saved_report_str:
+                try:
+                    rep = json.loads(saved_report_str)
+                    return prop["id"], rep, False
+                except Exception:
+                    pass
+
+        rep = cma_engine.analyze_property_valuation(prop, _cached_market_dataset)
+        return prop["id"], rep, True
+
+    reports = []
+    predictions_to_save = {}
+
+    with ThreadPoolExecutor(max_workers=min(len(target_rows), 10)) as executor:
+        results = list(executor.map(_analyze_single_property, target_rows))
+
+    for pid, report, is_new in results:
+        reports.append(report)
+        if is_new:
+            fair_price = report["valuation"]["fair_price_billion"]
+            report_json = json.dumps(report, ensure_ascii=False)
+            predictions_to_save[pid] = (fair_price, report_json)
+
+    if predictions_to_save:
+        conn = get_connection()
+        try:
+            for pid, (price, report_json) in predictions_to_save.items():
+                conn.execute(
+                    "UPDATE properties SET ai_predicted_price = ?, ai_valuation_report = ? WHERE id = ?",
+                    (price, report_json, pid)
+                )
+            conn.commit()
+        finally:
+            conn.close()
+
+    return jsonify({
+        "status": "ok",
+        "count": len(reports),
+        "reports": reports
+    })
+
+
+@app.post("/api/analyze-prices/item")
+def api_analyze_prices_item():
+    global _cached_market_dataset, _cached_rows
+    data = request.get_json(silent=True) or {}
+    property_id = data.get("property_id")
+    force_reanalyze = data.get("force", False)
+
+    if not property_id:
+        return jsonify({"status": "error", "message": "Missing property_id parameter."}), 400
+
+    repo = PropertyRepository()
+    if _cached_rows is None:
+        _cached_rows = [dict(row) for row in repo.fetch_all()]
+
+    target_row = next((r for r in _cached_rows if r.get("id") == property_id), None)
+    if not target_row:
+        all_rows = [dict(row) for row in repo.fetch_all()]
+        target_row = next((r for r in all_rows if r.get("id") == property_id), None)
+
+    if not target_row:
+        return jsonify({"status": "error", "message": f"Property ID {property_id} not found."}), 404
+
+    cma_engine = CMAValuationEngine()
+    if _cached_market_dataset is None or _cached_market_dataset.empty:
+        all_rows = [dict(row) for row in repo.fetch_all()]
+        _cached_market_dataset = cma_engine.prepare_market_dataset(all_rows)
+
+    # Skip LLM API call if already analyzed
+    if not force_reanalyze:
+        saved_report_str = target_row.get("ai_valuation_report")
+        if saved_report_str:
+            try:
+                report = json.loads(saved_report_str)
+                return jsonify({"status": "ok", "report": report, "cached": True})
+            except Exception:
+                pass
+
+    report = cma_engine.analyze_property_valuation(target_row, _cached_market_dataset)
+    fair_price = report["valuation"]["fair_price_billion"]
+    report_json = json.dumps(report, ensure_ascii=False)
+
+    conn = get_connection()
+    try:
+        conn.execute(
+            "UPDATE properties SET ai_predicted_price = ?, ai_valuation_report = ? WHERE id = ?",
+            (fair_price, report_json, property_id)
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({
+        "status": "ok",
+        "report": report,
+        "cached": False
+    })
+
+
 
 
 @app.post("/api/analyze-prices")

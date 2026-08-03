@@ -127,10 +127,26 @@
       <div class="modal-card card" style="max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; border-radius: var(--radius-xl); border: 1px solid var(--color-line); box-shadow: var(--shadow-soft); padding: 24px;">
         <button id="closeModalBtn" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--color-muted); line-height: 1;">&times;</button>
         
-        <div id="modalLoadingState" style="text-align: center; padding: 60px 20px;">
-          <div style="font-size: 2.8rem; margin-bottom: 16px;">🤖⚡</div>
-          <h3 style="margin: 0 0 8px;">Đang chạy Mô hình Định giá AI & CMA...</h3>
-          <p class="muted" style="margin: 0;">Đang chuẩn hóa đơn giá m², lọc tin ảo và tìm kiếm bất động sản so sánh tương đồng.</p>
+        <div id="modalLoadingState" style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 2.8rem; margin-bottom: 12px;">🤖⚡</div>
+          <h3 style="margin: 0 0 6px;">Running AI Valuation & CMA Model...</h3>
+          <p id="currentPropertyLabel" class="muted" style="margin: 0 0 16px; font-weight: 500; min-height: 1.4em; color: var(--color-primary);">
+            Initializing market dataset...
+          </p>
+
+          <!-- Progress Bar Container -->
+          <div style="background: var(--color-surface-2); border-radius: 999px; height: 12px; overflow: hidden; width: 100%; max-width: 520px; margin: 0 auto 12px; border: 1px solid var(--color-line);">
+            <div id="progressBarFill" style="background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); height: 100%; width: 0%; transition: width 0.15s ease-in-out;"></div>
+          </div>
+
+          <div id="progressStatus" style="font-size: 0.95rem; font-weight: 600; color: var(--color-foreground); margin-bottom: 18px;">
+            Standardizing unit prices per m² and filtering outliers...
+          </div>
+
+          <!-- Stop & Show Results Button -->
+          <button id="stopAnalyzeBtn" type="button" class="btn" style="background: var(--color-surface-2); border: 1px solid var(--color-line); color: var(--color-foreground); padding: 9px 22px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+            🛑 Stop Analyze & Show Results
+          </button>
         </div>
 
         <div id="modalReportContent" style="display: none; gap: 20px; flex-direction: column;">
@@ -149,20 +165,20 @@
           <!-- Price Range & Position Banner -->
           <div style="background: var(--color-surface-2); border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--color-line);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span style="font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; color: var(--color-muted);">Mức định giá AI đề xuất</span>
+              <span style="font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; color: var(--color-muted);">AI Valuation Assessment</span>
               <span id="pricePositionBadge" class="badge"></span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px;">
               <div>
-                <span style="font-size: 0.85rem; color: var(--color-muted);">Thấp nhất</span>
+                <span style="font-size: 0.85rem; color: var(--color-muted);">Minimum</span>
                 <div id="minPriceVal" style="font-weight: 700; font-size: 1.1rem; color: var(--color-foreground);"></div>
               </div>
               <div style="text-align: center;">
-                <span style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">Giá hợp lý đề xuất</span>
+                <span style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">Recommended Fair Price</span>
                 <div id="fairPriceVal" style="font-weight: 800; font-size: 2.2rem; color: var(--color-primary);"></div>
               </div>
               <div style="text-align: right;">
-                <span style="font-size: 0.85rem; color: var(--color-muted);">Cao nhất</span>
+                <span style="font-size: 0.85rem; color: var(--color-muted);">Maximum</span>
                 <div id="maxPriceVal" style="font-weight: 700; font-size: 1.1rem; color: var(--color-foreground);"></div>
               </div>
             </div>
@@ -172,32 +188,32 @@
           <!-- District Index & Market Temperature -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
             <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
-              <span class="small-note" style="color: var(--color-muted);">Đơn giá Trung vị Quận</span>
+              <span class="small-note" style="color: var(--color-muted);">District Median Price/m²</span>
               <div id="districtMedianPpm2" style="font-weight: 700; font-size: 1.2rem; margin-top: 4px;"></div>
             </div>
             <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
-              <span class="small-note" style="color: var(--color-muted);">Nhiệt độ Thị trường</span>
+              <span class="small-note" style="color: var(--color-muted);">Market Temperature</span>
               <div id="districtTemp" style="font-weight: 700; font-size: 1.1rem; margin-top: 4px; color: var(--color-accent);"></div>
             </div>
             <div style="background: var(--color-surface); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-line);">
-              <span class="small-note" style="color: var(--color-muted);">Biến động Giá</span>
+              <span class="small-note" style="color: var(--color-muted);">Price Momentum</span>
               <div id="districtMomentum" style="font-weight: 700; font-size: 1.1rem; margin-top: 4px; color: var(--color-success);"></div>
             </div>
           </div>
 
           <!-- Comparable Properties (CMA Table) -->
           <div>
-            <h4 style="margin: 0 0 10px;">Tài sản So sánh Tương đồng (CMA Peers)</h4>
+            <h4 style="margin: 0 0 10px;">Comparable Properties (CMA Peers)</h4>
             <div class="table-wrap">
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Tài sản So sánh</th>
-                    <th>Quận</th>
-                    <th>Diện tích</th>
-                    <th>Giá niêm yết</th>
-                    <th>Đơn giá/m²</th>
-                    <th>Độ tương đồng</th>
+                    <th>Comparable Property</th>
+                    <th>District</th>
+                    <th>Area</th>
+                    <th>Listed Price</th>
+                    <th>Unit Price/m²</th>
+                    <th>Similarity Score</th>
                   </tr>
                 </thead>
                 <tbody id="cmaTableBody">
@@ -208,14 +224,33 @@
 
           <!-- Strategic Recommendations -->
           <div style="background: var(--color-surface-2); padding: 18px; border-radius: var(--radius-lg); border: 1px solid var(--color-line);">
-            <h4 style="margin: 0 0 12px;">Khuyến nghị Chiến lược</h4>
+            <h4 style="margin: 0 0 12px;">Strategic Recommendations</h4>
             <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem;">
-              <div><strong style="color: var(--color-primary);">💼 Nhà đầu tư:</strong> <span id="recInvestor"></span></div>
-              <div><strong style="color: var(--color-success);">🏡 Người mua ở:</strong> <span id="recBuyer"></span></div>
-              <div><strong style="color: var(--color-accent);">🤝 Môi giới:</strong> <span id="recBroker"></span></div>
+              <div><strong style="color: var(--color-primary);">💼 Investor:</strong> <span id="recInvestor"></span></div>
+              <div><strong style="color: var(--color-success);">🏡 Homebuyer:</strong> <span id="recBuyer"></span></div>
+              <div><strong style="color: var(--color-accent);">🤝 Broker:</strong> <span id="recBroker"></span></div>
             </div>
           </div>
+
+          <!-- Pagination Navigation Footer -->
+          <div id="modalPaginationFooter" style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--color-line); margin-top: 10px;">
+            <button id="prevReportBtn" type="button" class="btn" style="background: var(--color-surface-2); border: 1px solid var(--color-line); color: var(--color-foreground); padding: 8px 18px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              ◀ Previous
+            </button>
+            
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: var(--color-foreground);">
+              <span>Property</span>
+              <input id="reportIndexInput" type="number" min="1" max="1" value="1" style="width: 60px; text-align: center; padding: 5px 8px; border-radius: var(--radius-md); border: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-foreground); font-weight: 700;">
+              <span>of <span id="reportTotalCount">1</span></span>
+            </div>
+
+            <button id="nextReportBtn" type="button" class="btn" style="background: var(--color-surface-2); border: 1px solid var(--color-line); color: var(--color-foreground); padding: 8px 18px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              Next ▶
+            </button>
+          </div>
         </div>
+
+
       </div>
     </div>
 
@@ -280,53 +315,156 @@
       window.addEventListener('tec-theme-change', buildCharts);
 
       // AI Valuation Modal Logic
+      let isAnalysisRunning = false;
+      let isAnalysisCancelled = false;
+      let activeAnalysisReports = [];
+      let currentReportIndex = 0;
+
       function getModalElements() {
         return {
           modal: document.getElementById('valuationModal'),
           closeBtn: document.getElementById('closeModalBtn'),
           loadingState: document.getElementById('modalLoadingState'),
-          reportContent: document.getElementById('modalReportContent')
+          reportContent: document.getElementById('modalReportContent'),
+          progressBarFill: document.getElementById('progressBarFill'),
+          progressStatus: document.getElementById('progressStatus'),
+          currentPropertyLabel: document.getElementById('currentPropertyLabel'),
+          stopAnalyzeBtn: document.getElementById('stopAnalyzeBtn')
         };
       }
 
       function hideModal() {
+        // Hiding modal does NOT cancel analysis; it only closes the popup view.
         const { modal } = getModalElements();
         if (modal) modal.style.display = 'none';
       }
 
+      function updateReportNavigationUI() {
+        const total = activeAnalysisReports.length;
+        const prevBtn = document.getElementById('prevReportBtn');
+        const nextBtn = document.getElementById('nextReportBtn');
+        const indexInput = document.getElementById('reportIndexInput');
+        const totalSpan = document.getElementById('reportTotalCount');
+
+        if (totalSpan) totalSpan.textContent = total || 1;
+        if (indexInput) {
+          indexInput.max = total || 1;
+          indexInput.value = total > 0 ? (currentReportIndex + 1) : 1;
+        }
+
+        if (prevBtn) {
+          prevBtn.disabled = currentReportIndex <= 0;
+          prevBtn.style.opacity = currentReportIndex <= 0 ? '0.5' : '1';
+          prevBtn.style.cursor = currentReportIndex <= 0 ? 'not-allowed' : 'pointer';
+        }
+
+        if (nextBtn) {
+          nextBtn.disabled = currentReportIndex >= total - 1;
+          nextBtn.style.opacity = currentReportIndex >= total - 1 ? '0.5' : '1';
+          nextBtn.style.cursor = currentReportIndex >= total - 1 ? 'not-allowed' : 'pointer';
+        }
+      }
+
+      function showReportAtIndex(index) {
+        if (!activeAnalysisReports || activeAnalysisReports.length === 0) return;
+        
+        let targetIndex = parseInt(index, 10);
+        if (isNaN(targetIndex)) targetIndex = 0;
+        if (targetIndex < 0) targetIndex = 0;
+        if (targetIndex >= activeAnalysisReports.length) targetIndex = activeAnalysisReports.length - 1;
+
+        currentReportIndex = targetIndex;
+        const report = activeAnalysisReports[currentReportIndex];
+        renderValuationReport(report, activeAnalysisReports.length);
+        updateReportNavigationUI();
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
-        const { modal, closeBtn } = getModalElements();
+        const { modal, closeBtn, stopAnalyzeBtn } = getModalElements();
         if (closeBtn) closeBtn.addEventListener('click', hideModal);
         if (modal) {
           modal.addEventListener('click', (e) => {
             if (e.target === modal) hideModal();
           });
         }
+        if (stopAnalyzeBtn) {
+          stopAnalyzeBtn.addEventListener('click', () => {
+            isAnalysisCancelled = true;
+            stopAnalyzeBtn.disabled = true;
+            stopAnalyzeBtn.textContent = 'Stopping & Rendering Results...';
+          });
+        }
+
+        const prevBtn = document.getElementById('prevReportBtn');
+        const nextBtn = document.getElementById('nextReportBtn');
+        const indexInput = document.getElementById('reportIndexInput');
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            if (currentReportIndex > 0) {
+              showReportAtIndex(currentReportIndex - 1);
+            }
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            if (currentReportIndex < activeAnalysisReports.length - 1) {
+              showReportAtIndex(currentReportIndex + 1);
+            }
+          });
+        }
+
+        if (indexInput) {
+          const handleInputChange = () => {
+            const val = parseInt(indexInput.value, 10);
+            if (!isNaN(val)) {
+              showReportAtIndex(val - 1);
+            }
+          };
+          indexInput.addEventListener('change', handleInputChange);
+          indexInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') handleInputChange();
+          });
+        }
+
+        // Keyboard Arrow Key Navigation
+        document.addEventListener('keydown', (e) => {
+          const modal = document.getElementById('valuationModal');
+          const reportContent = document.getElementById('modalReportContent');
+          if (modal && modal.style.display !== 'none' && reportContent && reportContent.style.display !== 'none') {
+            if (e.key === 'ArrowLeft' && currentReportIndex > 0) {
+              showReportAtIndex(currentReportIndex - 1);
+            } else if (e.key === 'ArrowRight' && currentReportIndex < activeAnalysisReports.length - 1) {
+              showReportAtIndex(currentReportIndex + 1);
+            }
+          }
+        });
       });
 
-      function renderValuationReport(report) {
+      function renderValuationReport(report, totalAnalyzed = 1) {
         if (!report) return;
         const val = report.valuation || {};
         const idx = report.district_index || {};
         const recs = report.recommendations || {};
 
         document.getElementById('reportTitle').textContent = report.title || 'Property Valuation';
-        document.getElementById('reportSubtitle').textContent = `${report.district} · ${report.property_type || 'BĐS'} · ${report.area}m² · Niêm yết: ${report.listed_price_billion} tỷ VND`;
+        document.getElementById('reportSubtitle').textContent = `Property ${currentReportIndex + 1} of ${totalAnalyzed} · ${report.district} · ${report.property_type || 'Property'} · ${report.area}m² · Listed: ${report.listed_price_billion} Billion VND`;
         
-        document.getElementById('confidenceBadge').textContent = `Độ tin cậy: ${val.confidence_level || 'Cao'}`;
+        document.getElementById('confidenceBadge').textContent = `Confidence: ${val.confidence_level || 'High'}`;
         
         const posBadge = document.getElementById('pricePositionBadge');
-        posBadge.textContent = val.price_position || 'Định giá hợp lý';
+        posBadge.textContent = val.price_position || 'Fair Market Price';
         posBadge.className = `badge badge-${val.badge_type || 'info'}`;
 
-        document.getElementById('minPriceVal').textContent = `${val.min_price_billion} tỷ`;
-        document.getElementById('fairPriceVal').textContent = `${val.fair_price_billion} tỷ VND`;
-        document.getElementById('maxPriceVal').textContent = `${val.max_price_billion} tỷ`;
+        document.getElementById('minPriceVal').textContent = `${val.min_price_billion} B`;
+        document.getElementById('fairPriceVal').textContent = `${val.fair_price_billion} Billion VND`;
+        document.getElementById('maxPriceVal').textContent = `${val.max_price_billion} B`;
 
         document.getElementById('reportRationale').textContent = val.rationale || '';
 
-        document.getElementById('districtMedianPpm2').textContent = `${idx.median_price_per_m2 || 0} triệu/m²`;
-        document.getElementById('districtTemp').textContent = idx.market_temperature || 'Ổn định';
+        document.getElementById('districtMedianPpm2').textContent = `${idx.median_price_per_m2 || 0} Million/m²`;
+        document.getElementById('districtTemp').textContent = idx.market_temperature || 'Stable';
         document.getElementById('districtMomentum').textContent = idx.price_momentum || '0.0%';
 
         // CMA Comparables
@@ -339,8 +477,8 @@
               <td><a href="${comp.url || '#'}" target="_blank" style="color:var(--color-primary); font-weight:500;">${comp.title}</a></td>
               <td>${comp.district}</td>
               <td>${comp.area} m²</td>
-              <td>${comp.price} triệu</td>
-              <td><strong>${comp.price_per_m2}</strong> triệu/m²</td>
+              <td>${comp.price} Million</td>
+              <td><strong>${comp.price_per_m2}</strong> Million/m²</td>
               <td><span class="badge badge-success">${comp.similarity_score}%</span></td>
             `;
             cmaBody.appendChild(tr);
@@ -353,41 +491,112 @@
         document.getElementById('recBroker').textContent = recs.broker || '';
       }
 
+
       const analyzeBtn = document.getElementById('analyzeBtn');
       if (analyzeBtn) {
         analyzeBtn.addEventListener('click', async () => {
-          const { modal, loadingState, reportContent } = getModalElements();
+          const { modal, loadingState, reportContent, progressBarFill, progressStatus, currentPropertyLabel, stopAnalyzeBtn } = getModalElements();
           
-          analyzeBtn.disabled = true;
-          analyzeBtn.textContent = 'Analyzing...';
-          
+          // Re-open progress popup if analysis is already running
+          if (isAnalysisRunning) {
+            if (modal) modal.style.display = 'flex';
+            return;
+          }
+
+          isAnalysisRunning = true;
+          isAnalysisCancelled = false;
+          activeAnalysisReports = [];
+
+          // Keep analyzeBtn enabled so user can click it to view progress popup
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = '⚡ Analyzing... (Click to view)';
+
+          if (stopAnalyzeBtn) {
+            stopAnalyzeBtn.disabled = false;
+            stopAnalyzeBtn.textContent = '🛑 Stop Analyze & Show Results';
+          }
+
           if (modal) {
             modal.style.display = 'flex';
             if (loadingState) loadingState.style.display = 'block';
             if (reportContent) reportContent.style.display = 'none';
+            if (progressBarFill) progressBarFill.style.width = '0%';
+            if (progressStatus) progressStatus.textContent = 'Standardizing unit prices per m² and filtering outliers...';
+            if (currentPropertyLabel) currentPropertyLabel.textContent = 'Initializing market dataset...';
           }
 
           try {
-            const res = await fetch('/api/analyze-prices', {method: 'POST'});
-            const data = await res.json();
-            
-            if (data.status === 'ok' && data.primary_report) {
-              renderValuationReport(data.primary_report);
+            // Step 1: Initialize dataset & get item list
+            const initRes = await fetch('/api/analyze-prices/init', { method: 'POST' });
+            const initData = await initRes.json();
+
+            if (initData.status !== 'ok' || !initData.items || initData.items.length === 0) {
+              alert(initData.message || 'No properties to analyze');
+              hideModal();
+              isAnalysisRunning = false;
+              analyzeBtn.textContent = 'Analyze Prices (AI)';
+              return;
+            }
+
+            const items = initData.items;
+            const total = items.length;
+            const BATCH_SIZE = 10;
+
+            // Step 2: Loop through properties in parallel batches of 10
+            for (let i = 0; i < total; i += BATCH_SIZE) {
+              if (isAnalysisCancelled) {
+                console.log(`Analysis stopped by user at batch starting at ${i} of ${total}`);
+                break;
+              }
+
+              const chunk = items.slice(i, i + BATCH_SIZE);
+              const batchIds = chunk.map(item => item.id);
+              const currentProcessed = Math.min(i + chunk.length, total);
+              const pct = Math.round((currentProcessed / total) * 100);
+
+              if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+              if (progressStatus) progressStatus.textContent = `Analyzed ${currentProcessed} / ${total} properties (${pct}%)`;
+              if (currentPropertyLabel) currentPropertyLabel.textContent = `Valuing batch ${Math.floor(i / BATCH_SIZE) + 1} (${chunk.length} properties in parallel: ${chunk[0].district} · ${chunk[0].area}m²)...`;
+
+              try {
+                const batchRes = await fetch('/api/analyze-prices/batch', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ property_ids: batchIds })
+                });
+                const batchData = await batchRes.json();
+                if (batchData.status === 'ok' && batchData.reports) {
+                  activeAnalysisReports.push(...batchData.reports);
+                }
+              } catch (batchErr) {
+                console.error(`Error analyzing batch starting at ${i}:`, batchErr);
+              }
+            }
+
+
+            // Step 3: Render results
+            if (activeAnalysisReports.length > 0) {
+              showReportAtIndex(0);
               if (loadingState) loadingState.style.display = 'none';
               if (reportContent) reportContent.style.display = 'flex';
             } else {
-              alert(data.message || 'Analysis failed');
+              alert('No properties were analyzed yet.');
               hideModal();
             }
+
           } catch(e) {
             alert('Error running AI valuation: ' + e);
             hideModal();
           }
 
+
+          isAnalysisRunning = false;
           analyzeBtn.disabled = false;
           analyzeBtn.textContent = 'Analyze Prices (AI)';
         });
       }
+
+
     </script>
   </body>
 </html>

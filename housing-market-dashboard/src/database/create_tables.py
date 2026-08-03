@@ -40,7 +40,10 @@ def create_tables() -> None:
             conn.execute("ALTER TABLE properties ADD COLUMN listing_date TEXT")
         if "ai_predicted_price" not in columns:
             conn.execute("ALTER TABLE properties ADD COLUMN ai_predicted_price REAL")
+        if "ai_valuation_report" not in columns:
+            conn.execute("ALTER TABLE properties ADD COLUMN ai_valuation_report TEXT")
 
         conn.commit()
     finally:
         conn.close()
+

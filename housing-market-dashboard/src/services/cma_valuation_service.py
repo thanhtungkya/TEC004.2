@@ -248,16 +248,16 @@ class CMAValuationEngine:
         if listed_billion > 0:
             diff_pct = ((listed_billion - fair_price) / fair_price) * 100
             if diff_pct < -7.0:
-                price_position = "Giá thấp hơn thị trường (Cơ hội đầu tư tốt)"
+                price_position = "Underpriced (Good Investment Opportunity)"
                 badge_type = "success"
             elif diff_pct > 7.0:
-                price_position = "Giá cao hơn mặt bằng chung (Cần thương lượng)"
+                price_position = "Overpriced (Negotiation Recommended)"
                 badge_type = "danger"
             else:
-                price_position = "Định giá hợp lý (Theo sát thị trường)"
+                price_position = "Fair Market Price (Aligned with Market)"
                 badge_type = "info"
         else:
-            price_position = "Định giá hợp lý"
+            price_position = "Fair Market Price"
             badge_type = "info"
 
         # AI Enrichment via configured LLM Provider
@@ -276,17 +276,17 @@ class CMAValuationEngine:
                 "fair_price_billion": ai_report.get("fair_price", fair_price),
                 "min_price_billion": ai_report.get("min_price", min_price),
                 "max_price_billion": ai_report.get("max_price", max_price),
-                "confidence_level": ai_report.get("confidence_level", "Cao (High)"),
+                "confidence_level": ai_report.get("confidence_level", "High"),
                 "price_position": ai_report.get("price_position", price_position),
                 "badge_type": badge_type,
-                "rationale": ai_report.get("rationale", "Định giá dựa trên phân tích 5 tài sản so sánh tương đồng (CMA) và mặt bằng giá m² theo quận.")
+                "rationale": ai_report.get("rationale", "Valuation calculated based on 5 comparable properties (CMA) and district median price/m² benchmarks.")
             },
             "comparables": comparables,
             "district_index": district_index,
             "recommendations": ai_report.get("recommendations", {
-                "investor": "Xem xét đàm phán giảm 3-5% để đạt tỷ suất sinh lời tối ưu.",
-                "buyer": "Phù hợp xuống tiền nếu vị trí thuận tiện và pháp lý đầy đủ.",
-                "broker": "Nhấn mạnh lợi thế diện tích và khoảng giá trung vị quận khi chào khách."
+                "investor": "Consider negotiating a 3-5% discount to maximize return on investment.",
+                "buyer": "Suitable for purchase if location is convenient and legal documentation is verified.",
+                "broker": "Highlight area unit price advantages and district median benchmarks when presenting to clients."
             })
         }
 
@@ -312,13 +312,13 @@ class CMAValuationEngine:
             "fair_price": fair_price,
             "min_price": min_price,
             "max_price": max_price,
-            "confidence_level": "Cao (High)" if len(comps) >= 3 else "Trung bình (Medium)",
-            "price_position": "Định giá hợp lý (Theo sát thị trường)",
-            "rationale": f"Bất động sản tại {prop.get('district')} ({prop.get('area')}m²) được so sánh với {len(comps)} tài sản tương đồng. Đơn giá trung vị khu vực đạt {district_index.get('median_price_per_m2')} triệu/m².",
+            "confidence_level": "High" if len(comps) >= 3 else "Medium",
+            "price_position": "Fair Market Price (Aligned with Market)",
+            "rationale": f"Property in {prop.get('district')} ({prop.get('area')}m²) evaluated against {len(comps)} comparable listings. District median unit price is {district_index.get('median_price_per_m2')} million VND/m².",
             "recommendations": {
-                "investor": "Theo dõi biên độ thương lượng 3-5% để tối ưu lợi nhuận.",
-                "buyer": "Mức giá hợp lý cho nhu cầu ở thực trong khu vực.",
-                "broker": "Sử dụng dữ liệu so sánh CMA để tư vấn mức giá chốt hợp lý cho cả 2 bên."
+                "investor": "Monitor negotiation margin of 3-5% for maximum return.",
+                "buyer": "Fair pricing for genuine residential demand in this area.",
+                "broker": "Use CMA comparables to demonstrate fair market value to both buyers and sellers."
             }
         }
 
@@ -326,27 +326,28 @@ class CMAValuationEngine:
             return default_result
 
         prompt = (
-            "Bạn là chuyên gia định giá bất động sản cao cấp thị trường Hà Nội.\n"
-            "Dựa trên dữ liệu tài sản mục tiêu, kết quả CMA (tài sản so sánh) và chỉ số giá quận sau:\n\n"
-            f"Tài sản mục tiêu: {json.dumps(prop, ensure_ascii=False)}\n"
-            f"Định giá tính toán sơ bộ (tỷ VND): Hợp lý = {fair_price}, Khoảng = [{min_price} - {max_price}]\n"
-            f"Tài sản so sánh CMA (5 căn tốt nhất): {json.dumps(comps, ensure_ascii=False)}\n"
-            f"Chỉ số giá Quận: {json.dumps(district_index, ensure_ascii=False)}\n\n"
-            "Hãy phân tích và trả về DUY NHẤT 1 đối tượng JSON với cấu trúc chính xác sau:\n"
+            "You are a real estate valuation expert for the Hanoi housing market.\n"
+            "Based on the target property data, CMA comparable properties, and district market indices below:\n\n"
+            f"Target Property: {json.dumps(prop, ensure_ascii=False)}\n"
+            f"Calculated Preliminary Valuation (Billion VND): Fair = {fair_price}, Range = [{min_price} - {max_price}]\n"
+            f"CMA Comparables (Top 5): {json.dumps(comps, ensure_ascii=False)}\n"
+            f"District Index: {json.dumps(district_index, ensure_ascii=False)}\n\n"
+            "Analyze the data and return ONLY a valid JSON object with the exact following schema:\n"
             "{\n"
-            '  "fair_price": number (giá hợp lý đề xuất in tỷ VND),\n'
-            '  "min_price": number (giá tối thiểu in tỷ VND),\n'
-            '  "max_price": number (giá tối đa in tỷ VND),\n'
-            '  "confidence_level": "Cao (High)" | "Trung bình (Medium)" | "Thấp (Low)",\n'
-            '  "price_position": "Giá thấp hơn thị trường (Cơ hội đầu tư tốt)" | "Định giá hợp lý (Theo sát thị trường)" | "Giá cao hơn mặt bằng chung (Cần thương lượng)",\n'
-            '  "rationale": "Chuỗi giải thích lý do định giá ngắn gọn 2-3 câu",\n'
+            '  "fair_price": number (recommended fair price in billion VND),\n'
+            '  "min_price": number (minimum fair price in billion VND),\n'
+            '  "max_price": number (maximum fair price in billion VND),\n'
+            '  "confidence_level": "High" | "Medium" | "Low",\n'
+            '  "price_position": "Underpriced (Good Investment Opportunity)" | "Fair Market Price (Aligned with Market)" | "Overpriced (Negotiation Recommended)",\n'
+            '  "rationale": "A concise 2-3 sentence valuation explanation in English",\n'
             '  "recommendations": {\n'
-            '    "investor": "Lời khuyên cho Nhà đầu tư",\n'
-            '    "buyer": "Lời khuyên cho Người mua ở",\n'
-            '    "broker": "Lời khuyên cho Môi giới"\n'
+            '    "investor": "Actionable advice for Investors in English",\n'
+            '    "buyer": "Actionable advice for Homebuyers in English",\n'
+            '    "broker": "Actionable advice for Real Estate Brokers in English"\n'
             "  }\n"
             "}"
         )
+
 
         try:
             if provider == "claude":
