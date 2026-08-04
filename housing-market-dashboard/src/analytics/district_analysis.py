@@ -1,5 +1,22 @@
+"""
+district_analysis.py
+Per-district statistical analytics and comparative price evaluation.
+
+Features:
+    - Ranks top districts by total listing volume and average prices
+    - Computes district price statistics (mean, median, min, max, std)
+    - Calculates area metrics (mean/median m²) and average price per m²
+
+Dependencies:
+    - pandas, numpy: Statistical aggregations and matrix operations
+
+Exports:
+    - DistrictAnalysis: Class containing per-district analytical methods
+"""
+
 import pandas as pd
 import numpy as np
+
 
 
 class DistrictAnalysis:

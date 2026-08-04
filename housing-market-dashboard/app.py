@@ -1,3 +1,21 @@
+"""
+app.py
+Main Web Dashboard & API application for Real Estate Analytics & AI Valuation.
+
+Features:
+    - Renders web pages: Dashboard, Analytics, Database view, Settings, Data Collection
+    - Background web scraper execution manager with real-time SSE progress streaming
+    - AI Valuation endpoints with 10-thread parallel batch execution & SQLite caching
+    - CSV data exports and AI model settings management (OpenAI, Claude, Gemini)
+
+Dependencies:
+    - flask: Web framework and SSE streaming
+    - src.analytics, database, processing, services: Core analytics & AI modules
+
+Exports:
+    - app: Main Flask web application instance
+"""
+
 import csv
 import json
 import math
@@ -7,6 +25,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, Response, jsonify, redirect, render_template, request, url_for
+
 
 
 from src.analytics.district_analysis import DistrictAnalysis
@@ -57,6 +76,14 @@ def index():
 
 
 def _bucket_price(value):
+    """Categorizes numeric price value in million VND into discrete price bands.
+
+    Args:
+        value: Price in million VND (e.g. 5200.0).
+
+    Returns:
+        str: Price band label (e.g. '1–3 tỷ', '3–5 tỷ', '> 10 tỷ').
+    """
     value = float(value or 0)
     if value <= 0:
         return "Unknown"
@@ -72,7 +99,13 @@ def _bucket_price(value):
 
 
 def _build_dashboard_context():
+    """Aggregates database records and builds data metrics for the dashboard template.
+
+    Returns:
+        dict: Full UI context dictionary including summary stats, district groups, and listing rows.
+    """
     repo = PropertyRepository()
+
     raw_rows = [dict(row) for row in repo.fetch_all()]
     dataframe = transform_records(raw_rows)
     rows = dataframe.to_dict("records")
@@ -743,18 +776,22 @@ def api_run_scraper():
 
     def _scrape_worker():
         global scraping_state
+        state_lock = threading.Lock()
+
         def _progress_cb(source_name):
-            scraping_state["progress"][source_name] += 1
+            with state_lock:
+                scraping_state["progress"][source_name] = scraping_state["progress"].get(source_name, 0) + 1
             
         def _log_cb(source_name, status, message):
             import datetime
             ts = datetime.datetime.now().strftime("%H:%M:%S")
-            scraping_state["logs"].append({
-                "time": ts,
-                "source": source_name.capitalize(),
-                "status": status,
-                "message": message
-            })
+            with state_lock:
+                scraping_state["logs"].append({
+                    "time": ts,
+                    "source": source_name.capitalize(),
+                    "status": status,
+                    "message": message
+                })
             
         try:
             results = run_all_scrapers(sources, progress_cb=_progress_cb, log_cb=_log_cb, abort_event=scraping_state["abort_event"])

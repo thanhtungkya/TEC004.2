@@ -1,4 +1,19 @@
+/**
+ * @file collection.js
+ * @description Frontend script for managing web scraper operations and real-time SSE progress logs.
+ *
+ * @features
+ * - Multi-source scraper selection (Alonhadat, Nhadat24h, Homedy, Batdongsan, etc.)
+ * - EventSource SSE listener for streaming real-time scraping log updates
+ * - Controls start/stop scraping actions and updates status badges
+ *
+ * @dependencies
+ * - Server-Sent Events (SSE) endpoint: /api/scrape/stream
+ * - API endpoints: /api/scrape/start, /api/scrape/stop, /api/scrape/status
+ */
+
 const sourceOptions = document.getElementById('sourceOptions');
+
 const keywordInput = document.getElementById('keywordInput');
 const districtSelect = document.getElementById('districtSelect');
 const startBtn = document.getElementById('startScrape');
@@ -9,17 +24,29 @@ const selectedSourceCount = document.getElementById('selectedSourceCount');
 const selectedDistrictLabel = document.getElementById('selectedDistrictLabel');
 const recordsSavedLabel = document.getElementById('recordsSavedLabel');
 
+/**
+ * Returns list of selected web scraper source identifiers.
+ * @returns {Array<string>} List of checked source keys.
+ */
 function selectedSources() {
   if (!sourceOptions) return [];
   return Array.from(sourceOptions.querySelectorAll('input:checked')).map((box) => box.value);
 }
 
+/**
+ * Updates UI summary badges with selected sources, district, and records saved count.
+ * @param {number} [recordsSaved] - Total records saved to database.
+ */
 function updateRunSummary(recordsSaved) {
   if (selectedSourceCount) selectedSourceCount.textContent = selectedSources().length;
   if (selectedDistrictLabel) selectedDistrictLabel.textContent = districtSelect?.value || 'All';
   if (recordsSavedLabel && recordsSaved !== undefined) recordsSavedLabel.textContent = recordsSaved;
 }
 
+/**
+ * Appends a log entry to the UI scraper execution console list.
+ * @param {string} message - Log message text.
+ */
 function log(message) {
   if (!logList) return;
   if (logList.children.length === 1 && logList.firstElementChild?.classList.contains('muted')) {
@@ -30,11 +57,17 @@ function log(message) {
   logList.prepend(item);
 }
 
+/**
+ * Updates the scraper status badge text and CSS badge style.
+ * @param {string} text - Status label.
+ * @param {string} [type] - Badge variant type ('badge-info', 'badge-success', etc.).
+ */
 function setStatus(text, type) {
   if (!statusBadge) return;
   statusBadge.textContent = text;
   statusBadge.className = 'badge ' + (type || 'badge-info');
 }
+
 
 let pollInterval = null;
 let lastLogCount = 0;

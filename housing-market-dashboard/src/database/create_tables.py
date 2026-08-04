@@ -1,8 +1,30 @@
+"""
+create_tables.py
+SQLite database table schema definition and incremental migration runner.
+
+Features:
+    - Creates properties table with fields for titles, prices, areas, source URLs, and AI reports
+    - Performs safe backward-compatible schema migrations for existing databases
+
+Dependencies:
+    - src.database.db_connection.get_connection: Database connection provider
+
+Exports:
+    - create_tables(): Initializes and migrates properties table schema
+"""
+
 from src.database.db_connection import get_connection
 
 
+
 def create_tables() -> None:
+    """Initializes SQLite database schema and executes incremental migrations.
+
+    Executes CREATE TABLE IF NOT EXISTS for properties table and checks table PRAGMA
+    info to alter and add any missing columns for existing local databases.
+    """
     conn = get_connection()
+
     try:
         conn.executescript(
             """

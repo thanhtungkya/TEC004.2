@@ -1,5 +1,21 @@
+"""
+clean_area.py
+Data processing utility for parsing and normalizing real estate area strings.
+
+Features:
+    - Parses square metre suffixes (m², m2, m 2) and decimal numbers
+    - Handles missing, null, or invalid input text safely, returning float('nan')
+
+Dependencies:
+    - re, math: Regular expressions and numeric validation
+
+Exports:
+    - clean_area(value): Converts raw area value to normalized float m²
+"""
+
 import re
 import math
+
 
 
 def clean_area(value):

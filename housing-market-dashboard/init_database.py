@@ -1,14 +1,22 @@
-#!/usr/bin/env python3
 """
-Script để khởi tạo SQLite database và tạo bảng.
-Có thể chạy độc lập không cần chạy ứng dụng chính.
+init_database.py
+Standalone CLI database initialization script.
 
-Usage:
-    python init_database.py
+Features:
+    - Creates database directories and housing_market.db SQLite database file
+    - Defines properties table schema and creates performance indexes
+    - Seed verification check for table creation
+
+Dependencies:
+    - sqlite3, pathlib.Path: File path and database engine
+
+Exports:
+    - init_database(): CLI runner function for standalone initialization
 """
 
 import sqlite3
 from pathlib import Path
+
 
 # Định nghĩa đường dẫn database
 BASE_DIR = Path(__file__).resolve().parent

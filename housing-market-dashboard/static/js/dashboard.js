@@ -1,4 +1,17 @@
+/**
+ * @file dashboard.js
+ * @description Dashboard metric cards updater script.
+ *
+ * @features
+ * - Fetches high-level summary metrics from /api/summary
+ * - Formats and populates total listings, average price, and average area cards
+ *
+ * @dependencies
+ * - API endpoint: /api/summary
+ */
+
 async function loadSummary() {
+
   try {
     const response = await fetch('/api/summary');
     const data = await response.json();
