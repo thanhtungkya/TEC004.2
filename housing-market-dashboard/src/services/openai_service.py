@@ -1,3 +1,21 @@
+"""
+openai_service.py
+Multi-provider LLM API client integration service (OpenAI, Anthropic Claude, Google Gemini).
+
+Features:
+    - Supports OpenAI ChatGPT API, Anthropic Claude API, and Google Gemini API endpoints
+    - Handles model prompt construction, HTTP request execution, and JSON parsing
+    - Fallback heuristic pricing algorithm when API key is unconfigured or rate limited
+
+Dependencies:
+    - openai, requests: HTTP and AI client libraries
+    - src.utils.env_utils: Environment configurations getter
+
+Exports:
+    - predict_prices(properties): Main price prediction interface
+    - _predict_openai(), _predict_claude(), _predict_gemini(): Provider-specific handlers
+"""
+
 import os
 import json
 import logging
@@ -6,6 +24,7 @@ import requests
 from openai import OpenAI
 from dotenv import load_dotenv
 from src.utils.env_utils import get_ai_config
+
 
 load_dotenv()
 

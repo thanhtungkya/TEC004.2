@@ -1,8 +1,29 @@
+"""
+transform_data.py
+Pandas data cleaning and feature engineering pipeline for property records.
+
+Features:
+    - Converts raw database listings into structured Pandas DataFrames
+    - Cleans numeric prices and areas using regex parsers
+    - Handles missing values via median imputation per district
+    - Detects price & area outliers using 1.5x IQR statistical bounds
+    - Computes derived metric columns (price_per_m2, listing month/year)
+
+Dependencies:
+    - pandas, numpy: High-performance data manipulation
+    - src.processing.clean_price, clean_area: Specialized text parsers
+
+Exports:
+    - DataCleaner: Class containing full cleaning pipeline
+    - transform_records(records): Utility function returning cleaned DataFrame
+"""
+
 import pandas as pd
 import numpy as np
 
 from src.processing.clean_price import clean_price
 from src.processing.clean_area import clean_area
+
 
 
 class DataCleaner:

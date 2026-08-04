@@ -1,5 +1,22 @@
+"""
+clean_price.py
+Data processing utility for parsing Vietnamese real estate price expressions into million VND values.
+
+Features:
+    - Parses Vietnamese price terms: "tỷ" (billions) and "triệu" (millions)
+    - Supports composite strings (e.g. "5 tỷ 200 triệu" -> 5200.0)
+    - Returns float('nan') for negotiation listings ("thỏa thuận", "liên hệ")
+
+Dependencies:
+    - re, math: Regular expressions and numeric validation
+
+Exports:
+    - clean_price(value): Converts raw price string/number to normalized million VND float
+"""
+
 import re
 import math
+
 
 
 def clean_price(value):

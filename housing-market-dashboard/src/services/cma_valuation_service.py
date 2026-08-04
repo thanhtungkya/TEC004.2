@@ -1,9 +1,29 @@
+"""
+cma_valuation_service.py
+Automated Comparative Market Analysis (CMA) and Multi-LLM AI Valuation engine.
+
+Features:
+    - Finds nearest comparable peer properties in the same district and segment
+    - Calculates statistical fair value baseline and market position index
+    - Prompts multi-provider LLMs (ChatGPT, Claude, Gemini) for structured valuation reports
+    - Synthesizes valuation range, confidence level, investment risks, and recommendations
+
+Dependencies:
+    - numpy, pandas: Statistical peer group analysis
+    - src.services.openai_service: Provider-agnostic LLM synthesis
+    - src.utils.env_utils: AI provider configuration
+
+Exports:
+    - CMAValuationEngine: Primary valuation engine class
+"""
+
 import json
 import logging
 import math
 from typing import List, Dict, Any, Optional
 import numpy as np
 import pandas as pd
+
 
 from src.processing.transform_data import DataCleaner
 from src.database.property_repository import PropertyRepository

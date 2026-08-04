@@ -1,6 +1,22 @@
+"""
+app.py
+Root deployment entrypoint module for Vercel, Render, and WSGI servers.
+
+Features:
+    - Dynamically loads housing-market-dashboard Flask application package
+    - Configures Python sys.path module resolution for production deployments
+
+Dependencies:
+    - importlib, sys, pathlib: Dynamic module loader and path configuration
+
+Exports:
+    - app: Production WSGI Flask application instance
+"""
+
 import importlib.util
 import sys
 from pathlib import Path
+
 
 PROJECT_DIR = Path(__file__).resolve().parent / "housing-market-dashboard"
 APP_FILE = PROJECT_DIR / "app.py"

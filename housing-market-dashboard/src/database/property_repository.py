@@ -1,8 +1,32 @@
+"""
+property_repository.py
+Repository pattern implementation for SQLite property database queries and inserts.
+
+Features:
+    - Normalizes flexible property tuple/dict inputs into unified database record structures
+    - Executes bulk batch insertions for high-performance scraper data saving
+    - Fetches all saved listings and existing listing URLs for duplicate detection
+
+Dependencies:
+    - src.database.db_connection.get_connection: Connection factory
+
+Exports:
+    - PropertyRepository: Class with insert_many(), fetch_all(), and fetch_urls() methods
+"""
+
 from src.database.db_connection import get_connection
 
 
+
 class PropertyRepository:
-    def insert_many(self, rows):
+    """Repository class for executing property queries and bulk insertions."""
+
+    def insert_many(self, rows) -> None:
+        """Normalizes and bulk-inserts property listing records into database.
+
+        Args:
+            rows: List of dicts or tuples containing scraped property data.
+        """
         normalised_rows = []
         for row in rows:
             if isinstance(row, dict):
@@ -54,6 +78,11 @@ class PropertyRepository:
             conn.close()
 
     def fetch_all(self):
+        """Fetches all property records ordered by ID descending.
+
+        Returns:
+            List[sqlite3.Row]: All saved property rows.
+        """
         conn = get_connection()
         try:
             return conn.execute("SELECT * FROM properties ORDER BY id DESC").fetchall()
@@ -61,8 +90,14 @@ class PropertyRepository:
             conn.close()
 
     def fetch_urls(self):
+        """Fetches list of all non-empty property URLs for deduplication.
+
+        Returns:
+            List[str]: List of existing listing URLs.
+        """
         conn = get_connection()
         try:
             return [row[0] for row in conn.execute("SELECT url FROM properties WHERE url IS NOT NULL AND TRIM(url) != ''").fetchall()]
         finally:
             conn.close()
+

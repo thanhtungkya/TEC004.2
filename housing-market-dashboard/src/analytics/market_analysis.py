@@ -1,5 +1,22 @@
+"""
+market_analysis.py
+Macro housing market statistical aggregations and trend reporting.
+
+Features:
+    - Calculates high-level market summary (total listings, average price, average area)
+    - Computes price per m² district rankings and property type distribution
+    - Analyzes seasonal time-series price trends and data source breakdowns
+
+Dependencies:
+    - pandas, numpy: High-performance data aggregation
+
+Exports:
+    - MarketAnalysis: Class containing full market analysis suite
+"""
+
 import pandas as pd
 import numpy as np
+
 
 
 class MarketAnalysis:

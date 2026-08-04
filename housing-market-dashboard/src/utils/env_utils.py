@@ -1,3 +1,20 @@
+"""
+env_utils.py
+Environment variables management and AI provider configuration persistence.
+
+Features:
+    - Reads AI provider settings, API keys, models, and custom endpoints
+    - Safely writes and updates settings in root .env configuration file
+    - Masking of sensitive API keys for secure UI representation
+
+Dependencies:
+    - os, pathlib.Path: File & environment variables access
+
+Exports:
+    - get_ai_config(): Returns dictionary with active AI configurations
+    - save_ai_config(provider, api_key, model, custom_endpoint): Updates .env and runtime os.environ
+"""
+
 import os
 from pathlib import Path
 from typing import Dict, Any
@@ -7,9 +24,19 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 ENV_FILE = BASE_DIR / ".env"
 
 
-def get_ai_config() -> Dict[str, Any]:
-    """Retrieve AI configuration from environment variables."""
 
+def get_ai_config() -> Dict[str, Any]:
+    """Retrieves current AI provider configuration from environment variables.
+
+    Returns:
+        Dict[str, Any]: Dictionary containing:
+            - provider: Active provider name ('chatgpt', 'claude', 'gemini')
+            - api_key: Masked API key string for safe UI presentation
+            - raw_api_key: Full unmasked API key string
+            - model: Target model ID
+            - custom_endpoint: Optional custom proxy/base URL
+            - has_key: Boolean indicating whether API key is present
+    """
     provider = os.getenv("AI_PROVIDER", "chatgpt").lower()
     api_key = os.getenv("AI_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
     model = os.getenv("AI_MODEL", "")
@@ -42,8 +69,20 @@ def get_ai_config() -> Dict[str, Any]:
         "has_key": bool(api_key),
     }
 
+
 def save_ai_config(provider: str, api_key: str, model: str, custom_endpoint: str = "") -> bool:
-    """Save AI configuration into root .env file and update os.environ."""
+    """Saves AI provider configuration into root .env file and updates os.environ.
+
+    Args:
+        provider: Selected AI provider name ('chatgpt', 'claude', 'gemini').
+        api_key: API key string (if masked string starting with '***' is passed, key is preserved).
+        model: Selected model identifier.
+        custom_endpoint: Optional custom base endpoint URL.
+
+    Returns:
+        bool: True if configuration was successfully saved.
+    """
+
     env_vars = {}
     
     if ENV_FILE.exists():
