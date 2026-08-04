@@ -776,18 +776,22 @@ def api_run_scraper():
 
     def _scrape_worker():
         global scraping_state
+        state_lock = threading.Lock()
+
         def _progress_cb(source_name):
-            scraping_state["progress"][source_name] += 1
+            with state_lock:
+                scraping_state["progress"][source_name] = scraping_state["progress"].get(source_name, 0) + 1
             
         def _log_cb(source_name, status, message):
             import datetime
             ts = datetime.datetime.now().strftime("%H:%M:%S")
-            scraping_state["logs"].append({
-                "time": ts,
-                "source": source_name.capitalize(),
-                "status": status,
-                "message": message
-            })
+            with state_lock:
+                scraping_state["logs"].append({
+                    "time": ts,
+                    "source": source_name.capitalize(),
+                    "status": status,
+                    "message": message
+                })
             
         try:
             results = run_all_scrapers(sources, progress_cb=_progress_cb, log_cb=_log_cb, abort_event=scraping_state["abort_event"])
