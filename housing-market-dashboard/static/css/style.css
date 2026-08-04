@@ -237,7 +237,7 @@ button:disabled, .btn:disabled { opacity: .58; cursor: not-allowed; }
 .hero-copy { color: var(--color-muted); max-width: 780px; font-size: 15px; line-height: 1.65; }
 .ambient-orb { position:absolute; right:-90px; top:-110px; width:260px; height:260px; border-radius:50%; background: radial-gradient(circle, rgba(59,130,246,.35), transparent 68%); filter: blur(2px); pointer-events:none; }
 
-.kpi-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.kpi-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .stat-card { display:flex; flex-direction:column; gap: 9px; min-height: 148px; }
 .stat-label { color: var(--color-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .14em; font-weight: 800; }
 .stat-value { font-family: var(--font-mono); font-size: clamp(26px, 3vw, 36px); font-weight: 700; letter-spacing: -.04em; }
